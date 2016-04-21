@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>SchemeUserState</key>
+	<dict>
+		<key>camelliae1.0.1.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>0</integer>
+		</dict>
+	</dict>
+	<key>SuppressBuildableAutocreation</key>
+	<dict>
+		<key>0A1779651CC7572C000E2C44</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>0A17797E1CC7572D000E2C44</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>0A1779891CC7572D000E2C44</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+	</dict>
+</dict>
+</plist>
