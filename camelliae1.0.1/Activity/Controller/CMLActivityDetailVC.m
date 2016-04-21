@@ -71,12 +71,9 @@
 
 @property (nonatomic,strong) UIImageView *collectBtnImge;
 
-
 @property (nonatomic,strong) UIButton *appointmentBtn;
 
 @property (nonatomic,strong) BaseResultObj *obj;
-
-@property (nonatomic,assign) BOOL isShow;
 
 @property (nonatomic,copy) NSString *currentApiName;
 
@@ -113,7 +110,6 @@
                                                                  self.view.frame.size.width,
                                                                  FunctionViewHeight*Proportion)];
     self.functionView.backgroundColor = [UIColor CMLVIPGrayColor];
-    self.isShow = YES;
     
     UIImageView *shareBtnImge = [[UIImageView alloc] initWithFrame:CGRectMake(ShareButtonLeftMargin*Proportion,
                                                                               ButtonTopMargin*Proportion,
@@ -262,12 +258,6 @@
     
 }
 
-
-//- (void)webView:(WKWebView *)webView didFinishNavigation:(null_unspecified WKNavigation *)navigation{
-//    
-//    [self stopLoading];
-//}
-
 - (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation{
     
     [self stopLoading];
@@ -355,55 +345,6 @@
 
 }
 
-#pragma mark - UIScrollViewDelegate
-
-//- (void)scrollViewDidScroll:(UIScrollView *)scrollView{
-//
-//    if (self.currentOffSetY > scrollView.contentOffset.y) {
-//        [self showFunctionView];
-//        
-//    }else{
-//        
-//        if (scrollView.contentOffset.y > 0) {
-//            [self hiddenFunctionView];
-//        }
-//    }
-//}
-//
-//- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView{
-//
-//    self.currentOffSetY = scrollView.contentOffset.y;
-//}
-
-//- (void) showFunctionView {
-//
-//    if (!self.isShow) {
-//        
-//        [UIView animateWithDuration:Duration animations:^{
-//            self.functionView.frame = CGRectMake(0,
-//                                                 self.contentView.frame.size.height - FunctionViewHeight*Proportion,
-//                                                 self.view.frame.size.width,
-//                                                 FunctionViewHeight*Proportion);
-//        } completion:^(BOOL finished) {
-//            self.isShow = YES;
-//        }];
-//    }
-//}
-//
-//- (void) hiddenFunctionView{
-//
-//    if (self.isShow) {
-//        
-//        [UIView animateWithDuration:Duration animations:^{
-//            self.functionView.frame = CGRectMake(0,
-//                                                 self.contentView.frame.size.height,
-//                                                 self.view.frame.size.width,
-//                                                 FunctionViewHeight*Proportion);
-//        } completion:^(BOOL finished) {
-//            self.isShow = NO;
-//        }];
-//    }
-//}
 
 - (void) makeAppointmentImmediately{
 
