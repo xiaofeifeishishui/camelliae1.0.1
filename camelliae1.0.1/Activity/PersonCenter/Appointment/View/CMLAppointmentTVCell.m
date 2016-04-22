@@ -86,7 +86,12 @@
     self.titleLabel.frame = CGRectMake(CGRectGetMaxX(self.image.frame) + MainImageLeftMargin*Proportion , self.image.frame.origin.y, titleLabelRect.size.width , titleLabelRect.size.height);
     self.contentLabel.text = self.content;
     CGRect rect = [self.content boundingRectWithSize:CGSizeMake([UIScreen mainScreen].bounds.size.width - self.image.frame.size.width - 3*MainImageLeftMargin*Proportion, 10000) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName:KSystemFontSize11} context:nil];
-    self.contentLabel.frame = CGRectMake(self.titleLabel.frame.origin.x, CGRectGetMaxY(self.titleLabel.frame) + MainImageTopMargin*Proportion, rect.size.width, rect.size.height);
+    if (rect.size.height > (self.frame.size.height - self.titleLabel.frame.size.height)) {
+        self.contentLabel.frame = CGRectMake(self.titleLabel.frame.origin.x, CGRectGetMaxY(self.titleLabel.frame) + MainImageTopMargin*Proportion, rect.size.width, (self.frame.size.height - self.titleLabel.frame.size.height));
+    }else{
+    
+        self.contentLabel.frame = CGRectMake(self.titleLabel.frame.origin.x, CGRectGetMaxY(self.titleLabel.frame) + MainImageTopMargin*Proportion, rect.size.width, rect.size.height);
+    }
     
     [NetWorkTask setImageView:self.image WithURL:[NSURL URLWithString:self.imageUrl] placeholderImage:[UIImage imageNamed:KActivityPlaceholderImg]];
     

@@ -96,4 +96,17 @@
 
  [self.defaults removeObjectForKey:@"userLevel"];
 }
+
+- (void) saveUserPoints:(NSNumber *)userPoints{
+
+    [self.defaults setObject:userPoints forKey:@"userPoints"];
+}
+- (NSNumber *)readUserPoints{
+
+    return [self.defaults objectForKey:@"userPoints"];
+}
+- (void) removeUserPoints{
+
+    [self.defaults removeObjectForKey:@"userPoints"];
+}
 @end

@@ -291,15 +291,26 @@
             UIView *headerView = [[UIView alloc] init];
             CGFloat height =[self addSubViewsTo:headerView];
             headerView.frame = CGRectMake(0, -height, self.view.frame.size.width, height);
-            self.webView.scrollView.contentInset = UIEdgeInsetsMake(height, 0, 0, 0);
+            [UIView animateWithDuration:1 animations:^{
+              self.webView.scrollView.contentInset = UIEdgeInsetsMake(height, 0, 0, 0);
+            }];
+            
             [self.webView.scrollView addSubview:headerView];
             [self.contentView addSubview:self.webView];
             [self.contentView addSubview:self.functionView];
             /**预约按键处理*/
-            if ([self.obj.retData.isUserSubscribe intValue] == 2) {
+            
+            if ([self.obj.retData.isAllowApply intValue] == 2) {
                  self.appointmentBtn.selected = NO;
                 [self.appointmentBtn setTitle:@"停止预约" forState:UIControlStateNormal];
                 self.appointmentBtn.userInteractionEnabled = NO;
+            }else{
+            
+                if ([self.obj.retData.isUserSubscribe intValue] == 1) {
+                    self.appointmentBtn.selected = YES;
+                }else{
+                    self.appointmentBtn.selected = NO;
+                }
             }
             
             
@@ -311,11 +322,6 @@
                 self.collectBtnImge.image = [UIImage imageNamed:KCollectBtnImg];
             }
             
-            if ([self.obj.retData.isUserSubscribe intValue] == 1) {
-                self.appointmentBtn.selected = YES;
-            }else{
-                self.appointmentBtn.selected = NO;
-            }
             [self stopLoading];
             
         }
@@ -352,7 +358,7 @@
         
         NSNumber *userLevel = [[DataManager lightData] readUserLevel];
 
-        if ([userLevel intValue] > [self.obj.retData.memberLevelId intValue]) {
+        if ([userLevel intValue] >= [self.obj.retData.memberLevelId intValue]) {
         
             NetWorkDelegate *delegate = [[NetWorkDelegate alloc] init];
             delegate.delegate = self;

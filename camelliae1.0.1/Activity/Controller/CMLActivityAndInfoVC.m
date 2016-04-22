@@ -184,7 +184,7 @@
     
     /**无数据显示*/
     self.noActivityLabel = [[UILabel alloc] init];
-    self.noActivityLabel.text = @"暂无活动信息";
+    self.noActivityLabel.text = @"该地区暂无活动信息";
     self.noActivityLabel.textColor = [UIColor grayColor];
     [self.noActivityLabel sizeToFit];
     self.noActivityLabel.center = self.mainTableView.center;
@@ -300,7 +300,7 @@
                             KPointsImg,
                             KSettingImg,
                             KMoreNewsImg];
-    NSArray *titleArray = @[@"预约管理",@"活动收藏",@"消息",@"积分",@"设置",@"更多精彩"];
+    NSArray *titleArray = @[@"预约管理",@"活动收藏",@"消息",@"积分",@"设置",@"敬请期待"];
     for (int i = 0 ; i < 6; i++) {
     
         UIButton *moduleBtn = [[UIButton alloc] init];

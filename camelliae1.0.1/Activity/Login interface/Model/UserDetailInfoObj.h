@@ -38,4 +38,6 @@
 
 @property (nonatomic,strong) NSNumber *birthday;
 
+@property (nonatomic,strong) NSNumber *userPoints;
+
 @end

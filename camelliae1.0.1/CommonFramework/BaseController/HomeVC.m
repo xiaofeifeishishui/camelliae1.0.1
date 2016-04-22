@@ -293,6 +293,7 @@
     [[DataManager lightData] saveUserName:resObj.retData.userInfo.userRealName];
     [[DataManager lightData]savePhone:resObj.retData.userInfo.mobile];
     [[DataManager lightData] saveUserLevel:resObj.retData.userInfo.memberLevel];
+    [[DataManager lightData] saveUserPoints:resObj.retData.userInfo.userPoints];
     
     self.userInfo = resObj.retData.userInfo;
     

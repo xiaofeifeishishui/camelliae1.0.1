@@ -41,6 +41,8 @@
 
 @property (nonatomic,strong) UITextField *codeTextField;
 
+@property (nonatomic,strong) UIImageView *backgroundImage;
+
 @end
 
 @implementation CMLLoginInterfaceVC
@@ -60,19 +62,34 @@
     [self.contentView addSubview:image];
     self.view.backgroundColor = [UIColor blackColor];
     [self loadViews];
+    
+    
+    //注册键盘出现的通知
+    [[NSNotificationCenter defaultCenter] addObserver:self
+     
+                                             selector:@selector(keyboardWasShown:)
+     
+                                                 name:UIKeyboardWillShowNotification object:nil];
+    
+    //注册键盘消失的通知
+    [[NSNotificationCenter defaultCenter] addObserver:self
+     
+                                             selector:@selector(keyboardWillBeHidden:)
+     
+                                                 name:UIKeyboardWillHideNotification object:nil];
 }
 
 
 - (void) loadViews{
 
-    UIImageView *backgroundImage = [[UIImageView alloc]initWithFrame:CGRectMake(0,
+    self.backgroundImage = [[UIImageView alloc]initWithFrame:CGRectMake(0,
                                                                                 0,
                                                                                 InputBackgroundWidth*Proportion,
                                                                                 InputBackgroundHeight*Proportion)];
-    backgroundImage.userInteractionEnabled = YES;
-    backgroundImage.image = [UIImage imageNamed:KLoginVCBackGroundImg];
-    backgroundImage.center = CGPointMake(self.contentView.center.x, self.contentView.center.y);
-    [self.contentView addSubview:backgroundImage];
+    self.backgroundImage.userInteractionEnabled = YES;
+    self.backgroundImage.image = [UIImage imageNamed:KLoginVCBackGroundImg];
+    self.backgroundImage.center = CGPointMake(self.contentView.center.x, self.contentView.center.y);
+    [self.contentView addSubview:self.backgroundImage];
     
     /**set LOGO*/
     UIImageView *LOGOImage = [[UIImageView alloc] initWithFrame:CGRectMake(0,
@@ -80,52 +97,50 @@
                                                                            LOGOWidth*Proportion,
                                                                            LOGOHeight*Proportion)];
     LOGOImage.image = [UIImage imageNamed:KLoginVCLoginLOGOImg];
-    LOGOImage.center = CGPointMake(backgroundImage.frame.size.width/2.0, LOGOTopMargin*Proportion + LOGOImage.frame.size.height/2.0);
-    [backgroundImage addSubview:LOGOImage];
+    LOGOImage.center = CGPointMake(self.backgroundImage.frame.size.width/2.0, LOGOTopMargin*Proportion + LOGOImage.frame.size.height/2.0);
+    [self.backgroundImage addSubview:LOGOImage];
     
-    CGFloat inputHeight = (backgroundImage.frame.size.height - LOGOImage.frame.size.height - LOGOTopMargin*Proportion - InputFrameTopMargin*Proportion - LoginBtnBottomMargin*Proportion - InputFrameSpace*Proportion*2)/3.0;
+    CGFloat inputHeight = (self.backgroundImage.frame.size.height - LOGOImage.frame.size.height - LOGOTopMargin*Proportion - InputFrameTopMargin*Proportion - LoginBtnBottomMargin*Proportion - InputFrameSpace*Proportion*2)/3.0;
     
     
     /**accountInput*/
     UIImageView *inputAccountBG = [[UIImageView alloc] initWithFrame:CGRectMake(InputFrameLeftMargin*Proportion,
                                                                                 CGRectGetMaxY(LOGOImage.frame) + InputFrameTopMargin*Proportion,
-                                                                                backgroundImage.frame.size.width - 2*InputFrameLeftMargin*Proportion,
+                                                                                self.backgroundImage.frame.size.width - 2*InputFrameLeftMargin*Proportion,
                                                                                 inputHeight)];
     inputAccountBG.image = [UIImage imageNamed:KLoginInputFrameImg];
     inputAccountBG.userInteractionEnabled = YES;
-    [backgroundImage addSubview:inputAccountBG];
+    [self.backgroundImage addSubview:inputAccountBG];
     
-    UITextField *accountTextField = [[UITextField alloc] initWithFrame:CGRectMake(1,
+    self.accountTextField = [[UITextField alloc] initWithFrame:CGRectMake(1,
                                                                                   1,
                                                                                   inputAccountBG.frame.size.width - 2,
                                                                                   inputAccountBG.frame.size.height - 2)];
-    accountTextField.placeholder = @"请输入手机号";
-    accountTextField.keyboardType = UIKeyboardTypeNumberPad;
-    accountTextField.clearButtonMode = UITextFieldViewModeAlways;
-    accountTextField.font = KSystemFontSize12;
-    accountTextField.textAlignment = NSTextAlignmentCenter;
-    self.accountTextField =accountTextField;
-    [inputAccountBG addSubview:accountTextField];
+    self.accountTextField.placeholder = @"请输入手机号";
+    self.accountTextField.keyboardType = UIKeyboardTypeNumberPad;
+    self.accountTextField.clearButtonMode = UITextFieldViewModeAlways;
+    self.accountTextField.font = KSystemFontSize12;
+    self.accountTextField.textAlignment = NSTextAlignmentCenter;
+    [inputAccountBG addSubview:self.accountTextField];
     
     
     
     /**codeInput*/
     UIImageView *inputCodeBG = [[UIImageView alloc] initWithFrame:CGRectMake(InputFrameLeftMargin*Proportion,
                                                                              CGRectGetMaxY(inputAccountBG.frame) + InputFrameSpace*Proportion,
-                                                                             backgroundImage.frame.size.width - 2*InputFrameLeftMargin*Proportion,
+                                                                             self.backgroundImage.frame.size.width - 2*InputFrameLeftMargin*Proportion,
                                                                              inputHeight)];
     inputCodeBG.image = [UIImage imageNamed:KLoginInputFrameImg];
     inputCodeBG.userInteractionEnabled = YES;
-    [backgroundImage addSubview:inputCodeBG];
+    [self.backgroundImage addSubview:inputCodeBG];
     
-    UITextField *codeTextField = [[UITextField alloc] initWithFrame:CGRectMake(1, 1, inputCodeBG.frame.size.width - 2, inputCodeBG.frame.size.height - 2)];
-    codeTextField.placeholder = @"请输入密码";
-    codeTextField.clearButtonMode = UITextFieldViewModeAlways;
-    codeTextField.secureTextEntry = YES;
-    codeTextField.font = KSystemFontSize12;
-    codeTextField.textAlignment = NSTextAlignmentCenter;
-    self.codeTextField =codeTextField;
-    [inputCodeBG addSubview:codeTextField];
+    self.codeTextField = [[UITextField alloc] initWithFrame:CGRectMake(1, 1, inputCodeBG.frame.size.width - 2, inputCodeBG.frame.size.height - 2)];
+    self.codeTextField.placeholder = @"请输入密码";
+    self.codeTextField.clearButtonMode = UITextFieldViewModeAlways;
+    self.codeTextField.secureTextEntry = YES;
+    self.codeTextField.font = KSystemFontSize12;
+    self.codeTextField.textAlignment = NSTextAlignmentCenter;
+    [inputCodeBG addSubview:self.codeTextField];
     
     
     /**loginBtn*/
@@ -135,24 +150,24 @@
                                                                     LoginBtnHeight*Proportion)];
     [loginBtn setImage:[UIImage imageNamed:KLoginVCOfLoginBtnImg] forState:UIControlStateNormal];
     [loginBtn addTarget:self action:@selector(enterMainVC) forControlEvents:UIControlEventTouchUpInside];
-    [backgroundImage addSubview:loginBtn];
+    [self.backgroundImage addSubview:loginBtn];
     
     
     /**registerBtn*/
-    UIButton *registerBtn = [[UIButton alloc] initWithFrame:CGRectMake(backgroundImage.frame.size.width - (InputFrameLeftMargin + LoginBtnWidth) *Proportion,
+    UIButton *registerBtn = [[UIButton alloc] initWithFrame:CGRectMake(self.backgroundImage.frame.size.width - (InputFrameLeftMargin + LoginBtnWidth) *Proportion,
                                                                        CGRectGetMaxY(inputCodeBG.frame) + InputFrameSpace*Proportion,
                                                                        LoginBtnWidth*Proportion,
                                                                        LoginBtnHeight*Proportion)];
     [registerBtn setImage:[UIImage imageNamed:KLoginVCOfRegisterBtnImg] forState:UIControlStateNormal];
     [registerBtn addTarget:self action:@selector(enterRegisterVC) forControlEvents:UIControlEventTouchUpInside];
-    [backgroundImage addSubview:registerBtn];
+    [self.backgroundImage addSubview:registerBtn];
     
-    UIButton *ForgetPasswordBtn = [[UIButton alloc] initWithFrame:CGRectMake(loginBtn.frame.origin.x, backgroundImage.frame.size.height - LoginBtnHeight*Proportion, loginBtn.frame.size.width, LoginBtnHeight*Proportion)];
+    UIButton *ForgetPasswordBtn = [[UIButton alloc] initWithFrame:CGRectMake(loginBtn.frame.origin.x, self.backgroundImage.frame.size.height - LoginBtnHeight*Proportion, loginBtn.frame.size.width, LoginBtnHeight*Proportion)];
     [ForgetPasswordBtn setTitle:@"忘记密码？" forState:UIControlStateNormal];
     ForgetPasswordBtn.titleLabel.font = KSystemFontSize12;
     ForgetPasswordBtn.titleLabel.textAlignment = NSTextAlignmentLeft;
     [ForgetPasswordBtn addTarget:self action:@selector(enterAlterVC) forControlEvents:UIControlEventTouchUpInside];
-    [backgroundImage addSubview:ForgetPasswordBtn];
+    [self.backgroundImage addSubview:ForgetPasswordBtn];
     
     
 
@@ -184,26 +199,39 @@
 
 - (void) enterMainVC{
 
-    NetWorkDelegate *delegate = [[NetWorkDelegate alloc] init];
-    delegate.delegate = self;
-    
-    NSMutableDictionary *paraDic = [NSMutableDictionary dictionary];
-    [paraDic setObject:self.accountTextField.text forKey:@"mobile"];
-    [paraDic setObject:self.codeTextField.text forKey:@"password"];
-    [paraDic setObject:@"0" forKey:@"smsCode"];
-    NSString *skey = [[DataManager lightData] readSkey];
-    NSString *hashToken = [NSString getEncryptStringfrom:@[self.accountTextField.text,
-                                                           skey,
-                                                           @"0",
-                                                           self.codeTextField.text]];
-    
-    [paraDic setObject:skey forKey:@"skey"];
-    [paraDic setObject:hashToken forKey:@"hashToken"];
-    
-    NSNumber *reqTime =[NSNumber numberWithInt:[AppGroup getCurrentDate]];
-    [paraDic setObject:reqTime forKey:@"reqTime"];
-    [NetWorkTask postResquestWithApiName:TelephoneLogin paraDic:paraDic delegate:delegate];
+    if (self.accountTextField.text.length > 0) {
 
+        
+        if (self.codeTextField.text.length > 0) {
+            NetWorkDelegate *delegate = [[NetWorkDelegate alloc] init];
+            delegate.delegate = self;
+            
+            NSMutableDictionary *paraDic = [NSMutableDictionary dictionary];
+            [paraDic setObject:self.accountTextField.text forKey:@"mobile"];
+            [paraDic setObject:self.codeTextField.text forKey:@"password"];
+            [paraDic setObject:@"0" forKey:@"smsCode"];
+            NSString *skey = [[DataManager lightData] readSkey];
+            NSString *hashToken = [NSString getEncryptStringfrom:@[self.accountTextField.text,
+                                                                   skey,
+                                                                   @"0",
+                                                                   self.codeTextField.text]];
+            
+            [paraDic setObject:skey forKey:@"skey"];
+            [paraDic setObject:hashToken forKey:@"hashToken"];
+            
+            NSNumber *reqTime =[NSNumber numberWithInt:[AppGroup getCurrentDate]];
+            [paraDic setObject:reqTime forKey:@"reqTime"];
+            [NetWorkTask postResquestWithApiName:TelephoneLogin paraDic:paraDic delegate:delegate];
+            
+        }else{
+        
+            [self showAlterViewWithText:@"请输入密码"];
+        }
+        
+    }else{
+    
+        [self showAlterViewWithText:@"请输入手机号"];
+    }
 }
 
 - (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
@@ -243,5 +271,30 @@
     CMLAlterCodeVC *vc = [[CMLAlterCodeVC alloc] init];
     [[VCManger mainVC] pushVC:vc animate:YES];
 
+}
+
+#pragma mark - 监控键盘的高度
+- (void)keyboardWasShown:(NSNotification*)aNotification{
+    
+    
+    NSDictionary* info = [aNotification userInfo];
+    CGSize kbSize = [[info objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue].size;
+    [UIView animateWithDuration:0.3 animations:^{
+        
+        self.backgroundImage.center = CGPointMake(self.contentView.center.x, self.contentView.center.y - kbSize.height/2.0);
+        
+    }];
+}
+
+
+
+-(void)keyboardWillBeHidden:(NSNotification*)aNotification{
+    
+    [UIView animateWithDuration:0.3 animations:^{
+        
+        self.backgroundImage.center = CGPointMake(self.contentView.center.x, self.contentView.center.y);
+        
+    }];
+    
 }
 @end

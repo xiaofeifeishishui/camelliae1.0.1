@@ -192,6 +192,7 @@ static inline NSPUIImageType NSPUIImageTypeFromData(NSData *imageData){
                                 @"生日",
                                 @"地区",
                                 @"会员等级",
+                                @"会员积分",
                                 @"手机号",
                                 @"真实姓名",
                                 @"修改密码"];
@@ -275,7 +276,7 @@ static inline NSPUIImageType NSPUIImageTypeFromData(NSData *imageData){
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
 
     if (section == 0) {
-        return 6;
+        return 7;
     }else if (section == 1){
     
         return 3;
@@ -317,7 +318,7 @@ static inline NSPUIImageType NSPUIImageTypeFromData(NSData *imageData){
         if (indexPath.section == 0) {
          cell.tag = indexPath.row;
         }else{
-            cell.tag = 6 + indexPath.row;
+            cell.tag = 7 + indexPath.row;
         }
     }
     
@@ -325,7 +326,7 @@ static inline NSPUIImageType NSPUIImageTypeFromData(NSData *imageData){
     if (indexPath.section == 0) {
         cell.textLabel.text = self.infoAttributeArray[indexPath.row];
     }else{
-        cell.textLabel.text = self.infoAttributeArray[indexPath.row +6];
+        cell.textLabel.text = self.infoAttributeArray[indexPath.row +7];
     }
     
     if ((indexPath.section == 0)&&(indexPath.row == 0)) {
@@ -387,7 +388,11 @@ static inline NSPUIImageType NSPUIImageTypeFromData(NSData *imageData){
                 break;
         }
         cell.attributeContent = level;
-    }else if ((indexPath.section == 1)&&(indexPath.row == 0)){
+    }else if ((indexPath.section == 0)&&(indexPath.row == 6)){
+        cell.hiddenIndicate = YES;
+        cell.attributeContent = [NSString stringWithFormat:@"%@",self.userInfo.userPoints];
+    
+    } else if ((indexPath.section == 1)&&(indexPath.row == 0)){
         cell.hiddenIndicate = YES;
         cell.attributeContent = [NSString stringWithFormat:@"%@",self.userInfo.mobile];
     }else if ((indexPath.section == 1)&&(indexPath.row == 1)){

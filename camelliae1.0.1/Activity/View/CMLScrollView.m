@@ -61,7 +61,7 @@
         UIScrollView *sv = [[UIScrollView alloc]initWithFrame:CGRectMake(i*_mainRect.size.width, 0, _mainRect.size.width, _mainRect.size.height)];
         UIImageView *imageView = [[UIImageView alloc]initWithFrame:CGRectMake(-1, -1, _mainRect.size.width+2, _mainRect.size.height+2)];
         UILabel *label = [[UILabel alloc] init];
-        label.textColor = [UIColor yellowColor];
+        label.textColor = [UIColor whiteColor];
         label.font = [UIFont systemFontOfSize:10];
         
         if (i == 0) {
@@ -70,8 +70,6 @@
                 label.text = _typeNameArray[_imgCount-1];
                 [label sizeToFit];
                 label.frame = CGRectMake(imageView.frame.size.width - label.frame.size.width - 5, imageView.frame.size.height - label.frame.size.height - 10, label.frame.size.width, label.frame.size.height);
-                label.layer.cornerRadius = label.frame.size.width/10;
-                label.layer.borderWidth = 1;
                 label.backgroundColor = [UIColor blueColor];
                 [imageView addSubview:label];
             }else{
@@ -85,8 +83,6 @@
                 label.text = _typeNameArray[0];
                 [label sizeToFit];
                 label.frame = CGRectMake(imageView.frame.size.width - label.frame.size.width - 5, imageView.frame.size.height - label.frame.size.height - 10, label.frame.size.width, label.frame.size.height);
-                label.layer.cornerRadius = label.frame.size.width/10;
-                label.layer.borderWidth = 1;
                 label.backgroundColor = [UIColor blueColor];
                 [imageView addSubview:label];
             }else{
@@ -99,8 +95,6 @@
                 label.text = _typeNameArray[i-1];
                 [label sizeToFit];
                 label.frame = CGRectMake(imageView.frame.size.width - label.frame.size.width - 5, imageView.frame.size.height - label.frame.size.height - 10, label.frame.size.width, label.frame.size.height);
-                label.layer.cornerRadius = label.frame.size.width/10;
-                label.layer.borderWidth = 1;
                 label.backgroundColor = [UIColor blueColor];
                 [imageView addSubview:label];
             }else{

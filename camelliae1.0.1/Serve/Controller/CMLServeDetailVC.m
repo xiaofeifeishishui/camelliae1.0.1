@@ -489,7 +489,7 @@
     
     /**收藏和分享*/
     UILabel *likeLabel = [[UILabel alloc] init];
-    likeLabel.text = [NSString stringWithFormat:@"%d人喜欢",[self.obj.retData.hitNum intValue] + [self.obj.retData.favNum intValue]];
+    likeLabel.text = [NSString stringWithFormat:@"%d人喜欢",[self.obj.retData.hitNum intValue]];
     likeLabel.textColor = [UIColor grayColor];
     likeLabel.font = KSystemFontSize12;
     [likeLabel sizeToFit];

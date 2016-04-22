@@ -25,13 +25,15 @@
 #define TelePhoneTopMargin      42
 #define InputFrameLeftMargin    36
 #define InputFrameWidth         375
-#define InputFrameTopMargin     114
+#define InputFrameTopMargin     80
 #define InputFrameHeight        100
-#define NextStepBtnTopMargin    130
+#define NextStepBtnTopMargin    90
 
 @interface CMLAlterCodeSecondStepVC ()<NavigationBarDelegate,NetWorkProtocol>
 
 @property (nonatomic,strong) UITextField *inputVerifyCodeTextField;
+
+@property (nonatomic,strong) UIView *mainBackGround;
 
 @end
 
@@ -46,13 +48,34 @@
     self.navBar.navigationBarDelegate =self;
     [self.navBar setWhiteLeftBarItem];
     
+    self.mainBackGround = [[UIView alloc] initWithFrame:CGRectMake(0, CGRectGetMaxY(self.navBar.frame), self.contentView.frame.size.width, self.contentView.frame.size.height )];
+    self.mainBackGround.backgroundColor = [UIColor CMLVIPGrayColor];
+
+    [self.contentView addSubview:self.mainBackGround];
+    self.contentView.backgroundColor = [UIColor CMLVIPGrayColor];
+    [self.contentView sendSubviewToBack:self.mainBackGround];
     [self loadViews];
     
-    self.contentView.backgroundColor = [UIColor CMLVIPGrayColor];
+    
+    
+    //注册键盘出现的通知
+    [[NSNotificationCenter defaultCenter] addObserver:self
+     
+                                             selector:@selector(keyboardWasShown:)
+     
+                                                 name:UIKeyboardWillShowNotification object:nil];
+    
+    //注册键盘消失的通知
+    [[NSNotificationCenter defaultCenter] addObserver:self
+     
+                                             selector:@selector(keyboardWillBeHidden:)
+     
+                                                 name:UIKeyboardWillHideNotification object:nil];
 }
 
 
 - (void) loadViews{
+    
     UILabel *describeLabel = [[UILabel alloc] init];
     describeLabel.textColor = [UIColor CMLInputTextGrayColor];
     describeLabel.text = @"您正在通过以下手机号召回密码";
@@ -60,10 +83,10 @@
     describeLabel.textColor = [UIColor CMLInputTextGrayColor];
     [describeLabel sizeToFit];
     describeLabel.frame = CGRectMake(self.view.frame.size.width/2.0 - describeLabel.frame.size.width/2.0,
-                                     DescribeTitleTopMargin*Proportion + CGRectGetMaxY(self.navBar.frame),
+                                     0,
                                      describeLabel.frame.size.width,
                                      describeLabel.frame.size.height);
-    [self.contentView addSubview:describeLabel];
+    [self.mainBackGround addSubview:describeLabel];
     
     UILabel *telePhoneLabel = [[UILabel alloc] init];
     telePhoneLabel.font =KSystemFontSize30;
@@ -71,13 +94,12 @@
     telePhoneLabel.text = self.telePhoneNum;
     telePhoneLabel.textColor = [UIColor CMLInputTextGrayColor];
     [telePhoneLabel sizeToFit];
-    telePhoneLabel.backgroundColor = [UIColor grayColor];
     telePhoneLabel.frame = CGRectMake(self.view.frame.size.width/2.0 - telePhoneLabel.frame.size.width/2.0,
                                       TelePhoneTopMargin*Proportion + CGRectGetMaxY(describeLabel.frame),
                                       telePhoneLabel.frame.size.width,
                                       telePhoneLabel.frame.size.height);
     telePhoneLabel.font = KSystemFontSize15;
-    [self.contentView addSubview:telePhoneLabel];
+    [self.mainBackGround addSubview:telePhoneLabel];
     
     UITextField *inputVerifyCodeTextField = [[UITextField alloc] initWithFrame:CGRectMake(InputFrameLeftMargin*Proportion,
                                                                                           CGRectGetMaxY(telePhoneLabel.frame) + InputFrameTopMargin*Proportion,
@@ -87,7 +109,7 @@
     inputVerifyCodeTextField.backgroundColor = [UIColor whiteColor];
     inputVerifyCodeTextField.font = KSystemFontSize15;
     self.inputVerifyCodeTextField =inputVerifyCodeTextField;
-    [self.contentView addSubview:self.inputVerifyCodeTextField];
+    [self.mainBackGround addSubview:self.inputVerifyCodeTextField];
     
     UIButton *getVerifyCodeBtn = [[UIButton alloc] initWithFrame:CGRectMake(CGRectGetMaxX(inputVerifyCodeTextField.frame),
                                                                             inputVerifyCodeTextField.frame.origin.y,
@@ -97,7 +119,7 @@
     [getVerifyCodeBtn setBackgroundColor:[UIColor blackColor]];
     getVerifyCodeBtn.titleLabel.font = KSystemFontSize15;
     [getVerifyCodeBtn addTarget:self action:@selector(getVerifyCode) forControlEvents:UIControlEventTouchUpInside];
-    [self.contentView addSubview:getVerifyCodeBtn];
+    [self.mainBackGround addSubview:getVerifyCodeBtn];
     
     
     UIButton *nextStepBtn = [[UIButton alloc] initWithFrame:CGRectMake(InputFrameLeftMargin*Proportion, CGRectGetMaxY(inputVerifyCodeTextField.frame) + NextStepBtnTopMargin*Proportion, self.view.frame.size.width - 2*InputFrameLeftMargin*Proportion, InputFrameHeight*Proportion)];
@@ -106,11 +128,9 @@
     nextStepBtn.layer.cornerRadius = 10;
     [nextStepBtn setBackgroundColor:[UIColor blackColor]];
     [nextStepBtn addTarget:self action:@selector(enterFinshedVC) forControlEvents:UIControlEventTouchUpInside];
-    [self.contentView addSubview:nextStepBtn];
+    [self.mainBackGround addSubview:nextStepBtn];
     
-    
-    
-    
+    self.mainBackGround.frame = CGRectMake(0, DescribeTitleTopMargin*Proportion + CGRectGetMaxY(self.navBar.frame), self.view.frame.size.width, describeLabel.frame.size.height + telePhoneLabel.frame.size.height + inputVerifyCodeTextField.frame.size.height + nextStepBtn.frame.size.height + TelePhoneTopMargin*Proportion + InputFrameTopMargin*Proportion+ NextStepBtnTopMargin*Proportion);
 
 }
 - (void)didReceiveMemoryWarning {
@@ -197,5 +217,30 @@
 
     [self.inputVerifyCodeTextField resignFirstResponder];
 
+}
+
+#pragma mark - 监控键盘的高度
+- (void)keyboardWasShown:(NSNotification*)aNotification{
+    
+    
+    NSDictionary* info = [aNotification userInfo];
+    CGSize kbSize = [[info objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue].size;
+    [UIView animateWithDuration:0.3 animations:^{
+        
+        self.mainBackGround.center = CGPointMake(self.contentView.center.x, self.contentView.center.y  - kbSize.height/2.0);
+        
+    }];
+}
+
+
+
+-(void)keyboardWillBeHidden:(NSNotification*)aNotification{
+    
+    [UIView animateWithDuration:0.3 animations:^{
+        
+        self.mainBackGround.center = CGPointMake(self.contentView.center.x, self.contentView.center.y);
+        
+    }];
+    
 }
 @end

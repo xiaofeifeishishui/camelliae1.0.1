@@ -20,6 +20,7 @@
 #import "DataManager.h"
 #import "CMLFontLayout.h"
 #import "CMLLine.h"
+#import "DataManager.h"
 
 #define LineStartPointX       36
 #define TextAndLineMargin     28
@@ -52,7 +53,7 @@
 
 - (void) loadData{
     
-    self.dataArray = @[@"APP服务模块（旅游、课程、生活等），线上消费获得会员积分。",@"引荐朋友申请成为卡枚连会员，可获得会员积分。",@"转发卡枚连文章：在个人微信朋友圈转发卡枚连官方微信公众号（包括订阅号和服务号）或卡枚连新浪微博公众号的发布文章，累计转发50篇（规则待讨论），可获得会员积分。",@"出席除粉色级别外的其他会员等级的线下活动，不定期获得幸运积分。",@"直接充值升级。（暂未开放，敬请期待）"];
+    self.dataArray = @[@"APP服务模块（旅游、课程、生活等），线上消费获得会员积分。",@"引荐朋友申请成为卡枚连会员，可获得会员积分。",@"转发卡枚连文章：在个人微信朋友圈转发卡枚连官方微信公众号（包括订阅号和服务号）或卡枚连新浪微博公众号的发布文章，可获得会员积分。",@"出席除粉色级别外的其他会员等级的线下活动，不定期获得幸运积分。",@"直接充值升级。（暂未开放，敬请期待）"];
     
     
     
@@ -70,7 +71,7 @@
     [self.contentView addSubview:view];
     
     UILabel *startLabel = [[UILabel alloc]init];
-    startLabel.text = @"如何快速升级会员等级";
+    startLabel.text = [NSString stringWithFormat:@"当前积分：%@",[[DataManager lightData] readUserPoints]];
     startLabel.font = KSystemFontSize14;
     [startLabel sizeToFit];
     startLabel.frame = CGRectMake(LineStartPointX*Proportion, view.frame.size.height/2.0 - startLabel.frame.size.height/2.0, startLabel.frame.size.width, startLabel.frame.size.height);

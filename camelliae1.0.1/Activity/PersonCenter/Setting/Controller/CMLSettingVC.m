@@ -119,6 +119,10 @@
             line.lineLength = self.view.frame.size.width;
             [self.contentView addSubview:line];
             
+            UIButton *clearBtn = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, view.frame.size.height)];
+            [clearBtn addTarget:self action:@selector(showClearContent) forControlEvents:UIControlEventTouchUpInside];
+            [view addSubview:clearBtn];
+            
             
         }
         
@@ -291,4 +295,10 @@
     
     }
 }
+
+#pragma mark - showClearContent
+- (void) showClearContent{
+    [self showAlterViewWithText:@"缓存已清除"];
+}
+
 @end

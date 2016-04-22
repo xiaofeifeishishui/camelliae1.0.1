@@ -13,7 +13,7 @@
 #import "CommonNumber.h"
 #import "VCManger.h"
 #import "CMLAlterCodeSecondStepVC.h"
-
+#import "DataManager.h"
 
 #define InputFrameTopMargin    46
 #define InputFrameLeftMargin   36
@@ -50,8 +50,13 @@
                                  self.view.frame.size.width - InputFrameLeftMargin*Proportion*2,
                                  InputFrameHeiight*Proportion);
     textField.placeholder = @"手机号";
+    textField.textAlignment = NSTextAlignmentCenter;
     textField.delegate = self;
     textField.backgroundColor = [UIColor whiteColor];
+    NSString *phoneNum = [[DataManager lightData] readPhone];
+    if (phoneNum.length > 0) {
+        textField.text = phoneNum;
+    }
     self.textField = textField;
     self.textField.textColor = [UIColor CMLInputTextGrayColor];
     self.textField.font = KSystemFontSize15;
@@ -84,9 +89,15 @@
 
     [self.textField resignFirstResponder];
     
-    CMLAlterCodeSecondStepVC *vc = [[CMLAlterCodeSecondStepVC alloc] init];
-    vc.telePhoneNum = self.textField.text;
-    [[VCManger mainVC] pushVC:vc animate:YES];
+    if (self.textField.text.length) {
+     
+        CMLAlterCodeSecondStepVC *vc = [[CMLAlterCodeSecondStepVC alloc] init];
+        vc.telePhoneNum = self.textField.text;
+        [[VCManger mainVC] pushVC:vc animate:YES];
+    }else{
+    
+        [self showAlterViewWithText:@"请输入手机号"];
+    }
 
 
 }

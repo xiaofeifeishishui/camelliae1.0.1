@@ -40,4 +40,8 @@
 - (void) saveUserLevel:(NSNumber *)userLevel;
 - (NSNumber *)readUserLevel;
 - (void) removeUserLevel;
+
+- (void) saveUserPoints:(NSNumber *)userPoints;
+- (NSNumber *)readUserPoints;
+- (void) removeUserPoints;
 @end
