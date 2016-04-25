@@ -213,9 +213,11 @@
             UIView *headerView = [[UIView alloc] init];
             CGFloat height =[self addSubViewsTo:headerView];
             headerView.frame = CGRectMake(0, -height, self.view.frame.size.width, height);
-            self.webView.scrollView.contentInset = UIEdgeInsetsMake(height, 0, 0, 0);
             [self.webView.scrollView addSubview:headerView];
             [self.contentView addSubview:self.webView];
+            [UIView animateWithDuration:1 animations:^{
+                self.webView.scrollView.contentInset = UIEdgeInsetsMake(height, 0, 0, 0);
+            }];
         
             if (self.obj.retData.isUserFav) {
                 self.collectBtn.selected = YES;

@@ -113,6 +113,7 @@
     self.navBar.titleColor = [UIColor CMLTitleYellowColor];
     self.navBar.navigationBarDelegate = self;
     [self.navBar setWhiteLeftBarItem];
+    [self.navBar setShareBarItem];
     self.navBar.backgroundColor = [UIColor blackColor];
     self.contentView.backgroundColor = [UIColor whiteColor];
     
@@ -290,11 +291,6 @@
     // Dispose of any resources that can be recreated.
 }
 
-- (void) didSelectedLeftBarItem{
-    
-    [[VCManger mainVC] dismissCurrentVC];
-    
-}
 
 - (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation{
     
@@ -333,10 +329,12 @@
             UIView *headerView = [[UIView alloc] init];
             CGFloat height =[self addSubViewsTo:headerView];
             headerView.frame = CGRectMake(0, -height, self.view.frame.size.width, height);
-            self.webView.scrollView.contentInset = UIEdgeInsetsMake(height, 0, 0, 0);
             [self.webView.scrollView addSubview:headerView];
             [self.contentView addSubview:self.webView];
             [self.contentView addSubview:self.functionView];
+            [UIView animateWithDuration:1 animations:^{
+                self.webView.scrollView.contentInset = UIEdgeInsetsMake(height, 0, 0, 0);
+            }];
             
             if ([self.obj.retData.isUserFav intValue] == 1) {
                 self.collectBtn.selected = YES;
@@ -1100,5 +1098,19 @@
     
         [self showAlterViewWithText:@"请输入电话"];
     }
+}
+
+
+#pragma mark - NavigationBarDelegate
+
+- (void) didSelectedRightBarItem{
+
+    [self showShareViewWithShareModel];
+}
+
+- (void) didSelectedLeftBarItem{
+    
+    [[VCManger mainVC] dismissCurrentVC];
+    
 }
 @end

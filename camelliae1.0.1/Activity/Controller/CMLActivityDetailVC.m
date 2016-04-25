@@ -94,6 +94,7 @@
     self.navBar.titleColor = [UIColor CMLTitleYellowColor];
     self.navBar.navigationBarDelegate = self;
     [self.navBar setWhiteLeftBarItem];
+    [self.navBar setShareBarItem];
     self.navBar.backgroundColor = [UIColor blackColor];
     self.contentView.backgroundColor = [UIColor CMLVIPGrayColor];
     
@@ -764,4 +765,11 @@
     
 }
 
+#pragma mark - NavigationBarDelegate
+
+- (void) didSelectedRightBarItem {
+
+    [self showShareViewWithShareModel];
+
+}
 @end
