@@ -286,6 +286,7 @@
             [self showAlterViewWithText:obj.retMsg];
         }
     }
+    
     [self.mainTableView finishLoading];
     [self.refreshFooter endRefreshing];
 }
@@ -405,17 +406,21 @@
 
 #pragma mark - pullToLoadingOfFooter
 - (void) pullToLoadingOfFooter{
-
-    if (self.dataArray.count < [self.dataCount intValue]) {
         
-        if (self.dataArray.count%PageSize == 0) {
-            
+    if (self.dataArray.count%PageSize == 0) {
+        if (self.dataArray.count != [self.dataCount intValue]) {
+            self.page++;
             if (self.isActivity) {
                [self sendRequestWithObjTypeId:[NSNumber numberWithInt:2] andPage:self.page];
             }else{
                 [self sendRequestWithObjTypeId:[NSNumber numberWithInt:3] andPage:self.page];
             }
+        }else{
+            [self.refreshFooter endRefreshing];
         }
+    }else{
+    
+        [self.refreshFooter endRefreshing];
     }
 }
 @end
