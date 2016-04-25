@@ -636,7 +636,6 @@
     
     
     [UIView animateWithDuration:0.2 animations:^{
-        
         self.shareBigBGView.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.4];
     }];
     

@@ -26,7 +26,7 @@
 #import "CMLInfomationTVCell.h"
 #import "CMLInformationDetailVC.h"
 
-#define ModuleHeight       260
+#define ModuleHeight       280
 
 #define PageSize           20
 
@@ -37,6 +37,7 @@
 @property (nonatomic,strong) UITableView *mainTableView;
 
 @property (nonatomic,strong) CMLRefreshFooter *refreshFooter;
+
 
 @property (nonatomic,assign) int page;
 
@@ -145,7 +146,10 @@
     
     BaseResultObj *obj = [BaseResultObj getBaseObjFrom:responseResult];
     if ([obj.retCode intValue] == 0) {
-        self.dataCount = obj.retData.dataCount;
+        if (obj.retData.dataCount) {
+           self.dataCount = obj.retData.dataCount;
+        }
+        
         if (obj.retData.dataList.count > 0) {
             
             [self.dataArray addObjectsFromArray:obj.retData.dataList];
@@ -248,14 +252,14 @@
 
 - (void) pullToLoadingOfFooter{
     
-    if (self.dataArray.count < [self.dataCount intValue]) {
         
-        if (self.dataArray.count%20 == 0) {
-            
+    if (self.dataArray.count%20 == 0) {
+        if (self.dataArray.count != [self.dataCount intValue]) {
             self.page++;
             [self setNetWorkWithType:self.currentInformationType andPage:self.page];
+        }else{
+            [self.refreshFooter endRefreshing];
         }
-        
     }else{
         
         [self.refreshFooter endRefreshing];

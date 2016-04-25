@@ -155,7 +155,6 @@
 #pragma mark - NetWorkProtocol
 - (void) requestSucceedBack:(id)responseResult
                 withApiName:(NSString *)apiName{
-
     BaseResultObj *obj = [BaseResultObj getBaseObjFrom:responseResult];
     if ([obj.retCode intValue] == 0) {
         self.dataCount = obj.retData.dataCount;
@@ -226,6 +225,7 @@
         [view removeFromSuperview];
     }
     if (self.dataArray.count > 0) {
+        
         /**get model*/
         CMLServeObj *serveModel =  [CMLServeObj getBaseObjFrom:self.dataArray[indexPath.row]];
         cell.serveName = serveModel.shortTitle;
@@ -260,13 +260,13 @@
 #pragma mark - 上拉加载
 
 - (void) pullToLoadingOfFooter{
-
-    if (self.dataArray.count < [self.dataCount intValue]) {
      
-        if (self.dataArray.count%20 == 0) {
-            
+    if (self.dataArray.count%20 == 0) {
+        if (self.dataArray.count != [self.dataCount intValue]) {
             self.page++;
             [self setNetWorkWithType:self.currentServeType andPage:self.page];
+        }else{
+            [self.refreshFooter endRefreshing];
         }
         
     }else{

@@ -261,7 +261,6 @@
 
 - (void) requestFailBack:(id)errorResult
              withApiName:(NSString *)apiName{
-
     [self showAlterViewWithText:@"失败"];
 
 }

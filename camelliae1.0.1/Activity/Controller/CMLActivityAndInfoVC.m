@@ -83,8 +83,6 @@
 
 @property (nonatomic,assign) NSInteger page;
 
-@property (nonatomic,assign) BOOL isRefreshOfFooter;
-
 @property (nonatomic,strong) CMLActivityTopView *topView;
 
 @property (nonatomic,strong) CMLScrollView *carouselFigureScro;
@@ -117,7 +115,6 @@
     // Do any additional setup after loading the view.
     self.view.backgroundColor = [UIColor whiteColor];
     self.page = 1;
-    self.isRefreshOfFooter = NO;
 
      [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
     self.view.backgroundColor = [UIColor blackColor];
@@ -387,13 +384,12 @@
         [view removeFromSuperview];
     }
     if (self.activityArray.count >0) {
-        
-        ActivityObj *obj = self.activityArray[indexPath.row];
-        cell.imgUrl = obj.coverPic;
-        cell.memberLevel = [obj.memberLevelId integerValue];
-        cell.shortTitle  =  obj.shortTitle;
-        [cell reloadTableViewCell];
-        
+         
+            ActivityObj *obj = self.activityArray[indexPath.row];
+            cell.imgUrl = obj.coverPic;
+            cell.memberLevel = [obj.memberLevelId integerValue];
+            cell.shortTitle  =  obj.shortTitle;
+            [cell reloadTableViewCell];
     }
 
     return cell;
@@ -467,14 +463,16 @@
         
     }else{
         
-        self.activityListCount = [baseObj.retData.dataCount integerValue];
+        if (baseObj.retData.dataCount) {
+          self.activityListCount = [baseObj.retData.dataCount integerValue];
+        }
         
         for (int i = 0; i < dataArray.count; i++) {
             
              ActivityObj *activityObj = [ActivityObj getBaseObjFrom:dataArray[i]];
             [self.activityArray addObject:activityObj];
         }
-        if (dataArray.count == 0) {
+        if (self.activityArray.count == 0) {
             self.noActivityLabel.hidden = NO;
         }else{
             self.noActivityLabel.hidden = YES;
@@ -487,11 +485,6 @@
             [weakTableView finishLoading];
         });
         
-        if (self.isRefreshOfFooter == YES) {
-            
-            [self.refreshFooter endRefreshing];
-            self.isRefreshOfFooter =NO;
-        }
     }
     [self stopLoading];
 }
@@ -561,9 +554,13 @@
 
     if (self.activityArray.count%CMLActivityPageSize == 0) {
         
-        self.page++;
-        [self getDataListWith:ActivityListRequest AndPage:(int)self.page];
-        self.isRefreshOfFooter = YES;
+        if (self.activityListCount != self.activityArray.count) {
+            self.page++;
+            [self getDataListWith:ActivityListRequest AndPage:(int)self.page];
+
+        }else{
+            [self.refreshFooter endRefreshing];
+        }
         
     }else{
         

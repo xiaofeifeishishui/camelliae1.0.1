@@ -51,7 +51,7 @@
     endLabel = [[UILabel alloc] init];
     endLabel.backgroundColor=[UIColor whiteColor];
     endLabel.textAlignment=NSTextAlignmentCenter;
-//    endLabel.text=@"没有更多了";
+    endLabel.text=@"没有更多了";
     endLabel.textColor=[UIColor grayColor];
     endLabel.font=KSystemFontSize12;
     [self.footerView addSubview:endLabel];
