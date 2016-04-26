@@ -307,10 +307,10 @@
 /**网络请求回调*/
 - (void) requestSucceedBack:(id)responseResult
                 withApiName:(NSString *)apiName{
-    self.obj =[BaseResultObj getBaseObjFrom:responseResult];
     
     if ([self.currentApiName isEqualToString:ProjectInfo]) {
         
+        self.obj = [BaseResultObj getBaseObjFrom:responseResult];
         NSData *imageNata = [NSData dataWithContentsOfURL:[NSURL URLWithString:self.obj.retData.coverPic]];
         UIImage *image = [UIImage imageWithData:imageNata];
         UIImage *transitImage = [UIImage scaleToRect:image];
@@ -358,7 +358,6 @@
     
         [self showAlterViewWithText:self.obj.retMsg];
         if ([self.obj.retCode intValue] == 0) {
-            
             self.appointmentBtn.selected = YES;
         }
         [self stopLoading];
@@ -366,6 +365,17 @@
         
     }else if ([self.currentApiName isEqualToString:ActivityFav]){
 
+        if ([self.obj.retCode intValue] == 0) {
+            
+            if (self.collectBtn.selected) {
+                self.collectBtnImge.image = [UIImage imageNamed:KCollectedBtnImg];
+                self.collectBtn.selected = YES;
+            }else{
+                self.collectBtnImge.image = [UIImage imageNamed:KCollectBtnImg];
+                self.collectBtn.selected = NO;
+            }
+        }
+        
         [self stopLoading];
         [self hiddenNotData];
         
@@ -383,7 +393,7 @@
 
 - (void) makeAppointmentImmediately{
     
-    if ([self.obj.retData.isUserSubscribe intValue] == 2) {
+    if (!self.appointmentBtn.selected) {
         
         self.isShowConfirmationView = YES;
         [self showShareViewWithShareModel];
@@ -399,13 +409,7 @@
 
 - (void) collectCurrentInfo: (UIButton *) button {
     
-    button.selected = !button.selected;
-    
-    if (button.selected) {
-        self.collectBtnImge.image = [UIImage imageNamed:KCollectedBtnImg];
-    }else{
-        self.collectBtnImge.image = [UIImage imageNamed:KCollectBtnImg];
-    }
+    self.collectBtn.selected = !self.collectBtn.selected;
     
     NetWorkDelegate *delegate = [[NetWorkDelegate alloc] init];
     delegate.delegate = self;

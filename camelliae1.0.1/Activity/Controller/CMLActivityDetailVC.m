@@ -56,6 +56,7 @@
 #define ShareBtnWidthAndHeight           58
 #define ShareTypeNameTopMargin           16
 
+#define InputViewHeight                  300
 
 @interface CMLActivityDetailVC ()<NavigationBarDelegate,NetWorkProtocol,UIWebViewDelegate,UIScrollViewDelegate,WXApiDelegate,WKUIDelegate,WKNavigationDelegate>
 
@@ -83,6 +84,10 @@
 
 @property (nonatomic,strong) UIImage *shareImage;
 
+@property (nonatomic,strong) UITextField *commentTextField;
+
+@property (nonatomic,strong) UIView *textFieldBigBGView;
+
 @end
 
 @implementation CMLActivityDetailVC
@@ -97,6 +102,20 @@
     [self.navBar setShareBarItem];
     self.navBar.backgroundColor = [UIColor blackColor];
     self.contentView.backgroundColor = [UIColor CMLVIPGrayColor];
+    
+    //注册键盘出现的通知
+    [[NSNotificationCenter defaultCenter] addObserver:self
+     
+                                             selector:@selector(keyboardWasShown:)
+     
+                                                 name:UIKeyboardWillShowNotification object:nil];
+    
+    //注册键盘消失的通知
+    [[NSNotificationCenter defaultCenter] addObserver:self
+     
+                                             selector:@selector(keyboardWillBeHidden:)
+     
+                                                 name:UIKeyboardWillHideNotification object:nil];
     
     [self loadViews];
     [self setNetWork];
@@ -120,7 +139,7 @@
     shareBtnImge.image = [UIImage imageNamed:KShareBtnImg];
     [self.functionView addSubview:shareBtnImge];
     
-    
+    /**share*/
     UIButton *shareBtn = [[UIButton alloc] initWithFrame:CGRectMake(ShareButtonLeftMargin*Proportion - (FunctionViewHeight*Proportion - ButtonWidth*Proportion)/2.0,
                                                                     0,
                                                                     FunctionViewHeight*Proportion,
@@ -141,6 +160,14 @@
                                   shareLabel.frame.size.height);
     [self.functionView addSubview:shareLabel];
     
+     self.commentTextField = [[UITextField alloc] init];
+    UIView *customView = [[UIView alloc] initWithFrame:CGRectMake(0,
+                                                                  0,
+                                                                  self.view.frame.size.width,
+                                                                  InputViewHeight*Proportion)];
+    customView.backgroundColor = [UIColor whiteColor];
+    self.commentTextField.inputAccessoryView = customView;
+    [self.functionView addSubview:self.commentTextField];
     
     /**收藏按键*/
     
@@ -244,20 +271,12 @@
     }
 }
 
-- (void) textAnalysis{
 
-
-}
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
 
-- (void) didSelectedLeftBarItem{
-
-    [[VCManger mainVC] dismissCurrentVC];
-    
-}
 
 - (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation{
     
@@ -269,10 +288,10 @@
 /**网络请求回调*/
 - (void) requestSucceedBack:(id)responseResult
                 withApiName:(NSString *)apiName{
-
-    self.obj =[BaseResultObj getBaseObjFrom:responseResult];
     
     if ([self.currentApiName isEqualToString:ActivityInfo]) {
+        
+        self.obj =[BaseResultObj getBaseObjFrom:responseResult];
         
         NSData *imageNata = [NSData dataWithContentsOfURL:[NSURL URLWithString:self.obj.retData.coverPic]];
         UIImage *image = [UIImage imageWithData:imageNata];
@@ -336,6 +355,17 @@
         
     }else if ([self.currentApiName isEqualToString:ActivityFav]){
        
+        if ([self.obj.retCode intValue] == 0) {
+            
+            if (self.collectBtn.selected) {
+                self.collectBtnImge.image = [UIImage imageNamed:KCollectedBtnImg];
+                self.collectBtn.selected = YES;
+            }else{
+                self.collectBtnImge.image = [UIImage imageNamed:KCollectBtnImg];
+                self.collectBtn.selected = NO;
+            }
+        }
+        
         [self stopLoading];
     
     }else if ([self.currentApiName isEqualToString:ActivityShare]){
@@ -355,7 +385,7 @@
 
 - (void) makeAppointmentImmediately{
 
-    if ([self.obj.retData.isUserSubscribe intValue] == 2) {
+    if (!self.appointmentBtn.selected) {
         
         NSNumber *userLevel = [[DataManager lightData] readUserLevel];
 
@@ -394,13 +424,7 @@
 
 - (void) collectCurrentInfo: (UIButton *) button {
 
-    button.selected = !button.selected;
-    
-    if (button.selected) {
-        self.collectBtnImge.image = [UIImage imageNamed:KCollectedBtnImg];
-    }else{
-        self.collectBtnImge.image = [UIImage imageNamed:KCollectBtnImg];
-    }
+    self.collectBtn.selected = !self.collectBtn.selected;
     
     NetWorkDelegate *delegate = [[NetWorkDelegate alloc] init];
     delegate.delegate = self;
@@ -572,8 +596,12 @@
 
 - (void) shareCurrentPage{
 
+    self.textFieldBigBGView = [[UIView alloc] initWithFrame:self.contentView.bounds];
+    self.textFieldBigBGView.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.4];
+    [self.contentView addSubview:self.textFieldBigBGView];
 
-    [self showShareViewWithShareModel];
+    [self.commentTextField becomeFirstResponder];
+
 }
 
 
@@ -653,6 +681,15 @@
 
 - (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
     
+    /**评论时的界面处理*/
+    [self.commentTextField resignFirstResponder];
+    [UIView animateWithDuration:1 animations:^{
+        self.textFieldBigBGView.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0];
+    } completion:^(BOOL finished) {
+        [self.textFieldBigBGView removeFromSuperview];
+    }];
+    
+    /**分享时的界面处理*/
     [UIView animateWithDuration:0.2 animations:^{
         self.shareMainBgView.frame = CGRectMake(0,
                                                 self.contentView.frame.size.height,
@@ -769,7 +806,30 @@
 
 - (void) didSelectedRightBarItem {
 
+    [self.commentTextField resignFirstResponder];
     [self showShareViewWithShareModel];
 
+}
+
+- (void) didSelectedLeftBarItem{
+    
+    [self.commentTextField resignFirstResponder];
+    [[VCManger mainVC] dismissCurrentVC];
+    
+}
+
+#pragma mark - 监控键盘的高度
+- (void)keyboardWasShown:(NSNotification*)aNotification{
+ 
+    
+
+}
+
+
+
+-(void)keyboardWillBeHidden:(NSNotification*)aNotification{
+    
+
+    
 }
 @end
