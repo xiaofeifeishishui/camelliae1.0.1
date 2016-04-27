@@ -75,4 +75,8 @@
 + (UIColor *)CMLTabBarItemGrayColor{
     return [self colorWithHex:@"#878787"];
 }
+/**commentTime*/
++ (UIColor *)CMLCommentTimeGrayColor{
+    return [self colorWithHex:@"7f7f7f"];
+}
 @end

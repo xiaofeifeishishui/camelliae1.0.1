@@ -26,8 +26,11 @@
 #import "NSDate+CMLExspand.h"
 #import "CMLLine.h"
 #import "WXApi.h"
+#import "UMSocial.h"
 #import "UIImage+CMLExspand.h"
-
+#import "CMLCommentListTVCell.h"
+#import "CommentObj.h"
+#import "CMLRefreshFooter.h"
 
 #define Duration                  0.5f
 #define FunctionViewHeight        83
@@ -57,8 +60,13 @@
 #define ShareTypeNameTopMargin           16
 
 #define InputViewHeight                  300
+#define commentBtnHeight                 100
+#define commentBtnWidth                  200
 
-@interface CMLActivityDetailVC ()<NavigationBarDelegate,NetWorkProtocol,UIWebViewDelegate,UIScrollViewDelegate,WXApiDelegate,WKUIDelegate,WKNavigationDelegate>
+#define PageSize                         20
+
+@interface CMLActivityDetailVC ()<NavigationBarDelegate,NetWorkProtocol,UIWebViewDelegate,UIScrollViewDelegate,WXApiDelegate,WKUIDelegate,WKNavigationDelegate,UITextViewDelegate,UITableViewDelegate,UITableViewDataSource>
+
 
 @property(nonatomic,strong) WKWebView *webView;
 
@@ -84,13 +92,41 @@
 
 @property (nonatomic,strong) UIImage *shareImage;
 
-@property (nonatomic,strong) UITextField *commentTextField;
+@property (nonatomic,strong) UIImage *shareToSinaImage;
+
+@property (nonatomic,strong) UIView *commentTxtMainView;
+
+@property (nonatomic,strong) UITextView *commentTextView;
 
 @property (nonatomic,strong) UIView *textFieldBigBGView;
+
+@property (nonatomic,assign) CGFloat currentOffSet;
+
+@property (nonatomic,assign) CGFloat webViewrealHeight;
+
+@property (nonatomic,strong) UITableView *commentTableView;
+
+@property (nonatomic,strong) BaseResultObj *commentrootObj;
+
+@property (nonatomic,assign) int page;
+
+@property (nonatomic,strong) CMLRefreshFooter *refreshFooter;
+
+@property (nonatomic,strong) NSMutableArray *dataArray;
+
+@property (nonatomic,strong) UILabel *noCommentLabel;
 
 @end
 
 @implementation CMLActivityDetailVC
+
+- (NSMutableArray *)dataArray{
+
+    if (!_dataArray) {
+        _dataArray = [NSMutableArray array];
+    }
+    return _dataArray;
+}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -102,6 +138,8 @@
     [self.navBar setShareBarItem];
     self.navBar.backgroundColor = [UIColor blackColor];
     self.contentView.backgroundColor = [UIColor CMLVIPGrayColor];
+    
+    self.page = 1;
     
     //注册键盘出现的通知
     [[NSNotificationCenter defaultCenter] addObserver:self
@@ -133,10 +171,10 @@
     
     UIImageView *shareBtnImge = [[UIImageView alloc] initWithFrame:CGRectMake(ShareButtonLeftMargin*Proportion,
                                                                               ButtonTopMargin*Proportion,
-                                                                              ButtonWidth*Proportion,
+                                                                              ShareBtnHeight*Proportion,
                                                                               ShareBtnHeight*Proportion)];
     shareBtnImge.userInteractionEnabled = YES;
-    shareBtnImge.image = [UIImage imageNamed:KShareBtnImg];
+    shareBtnImge.image = [UIImage imageNamed:KFeedbackImg];
     [self.functionView addSubview:shareBtnImge];
     
     /**share*/
@@ -149,7 +187,7 @@
     [self.functionView addSubview:shareBtn];
     
     UILabel *shareLabel = [[UILabel alloc] init];
-    shareLabel.text = @"分享";
+    shareLabel.text = @"评论";
     shareLabel.textColor = [UIColor blackColor];
     shareLabel.font = KSystemFontSize9;
     [shareLabel sizeToFit];
@@ -160,14 +198,50 @@
                                   shareLabel.frame.size.height);
     [self.functionView addSubview:shareLabel];
     
-     self.commentTextField = [[UITextField alloc] init];
-    UIView *customView = [[UIView alloc] initWithFrame:CGRectMake(0,
-                                                                  0,
-                                                                  self.view.frame.size.width,
-                                                                  InputViewHeight*Proportion)];
-    customView.backgroundColor = [UIColor whiteColor];
-    self.commentTextField.inputAccessoryView = customView;
-    [self.functionView addSubview:self.commentTextField];
+    
+    self.commentTxtMainView = [[UIView alloc] initWithFrame:CGRectMake(0,
+                                                                      CGRectGetMaxY(self.contentView.frame),
+                                                                      self.view.frame.size.width,
+                                                                      InputViewHeight*Proportion+commentBtnHeight*Proportion)];
+    self.commentTxtMainView.backgroundColor = [UIColor lightGrayColor];
+
+    self.commentTextView = [[UITextView alloc] initWithFrame:CGRectMake(0,
+                                                                       commentBtnHeight*Proportion,
+                                                                       self.view.frame.size.width,
+                                                                       InputViewHeight*Proportion)];
+    self.commentTextView.font = KSystemFontSize14;
+    self.commentTextView.delegate = self;
+    self.commentTextView.backgroundColor = [UIColor lightTextColor];
+    [self.commentTxtMainView addSubview:self.commentTextView];
+    
+    UIButton *cancelBtn = [[UIButton alloc] initWithFrame:CGRectMake(0,
+                                                                     0,
+                                                                     commentBtnWidth*Proportion,
+                                                                     commentBtnHeight*Proportion)];
+    [cancelBtn addTarget:self action:@selector(cancelComment) forControlEvents:UIControlEventTouchUpInside];
+    [cancelBtn setTitle:@"取消" forState:UIControlStateNormal];
+    cancelBtn.titleLabel.font = KSystemFontSize14;
+    cancelBtn.titleEdgeInsets = UIEdgeInsetsMake(0,
+                                                 -cancelBtn.frame.size.width/2.0,
+                                                 0,
+                                                 0);
+    [self.commentTxtMainView addSubview:cancelBtn];
+    
+    UIButton *confirmBtn = [[UIButton alloc] initWithFrame:CGRectMake(self.view.frame.size.width - commentBtnWidth*Proportion,
+                                                                      0,
+                                                                      commentBtnWidth*Proportion,
+                                                                      commentBtnHeight*Proportion)];
+    [confirmBtn setTitle:@"确定" forState:UIControlStateNormal];
+    confirmBtn.titleLabel.font = KSystemFontSize14;
+    confirmBtn.titleEdgeInsets = UIEdgeInsetsMake(0,
+                                                  cancelBtn.frame.size.width/2.0,
+                                                  0,
+                                                  0);
+    [confirmBtn addTarget:self action:@selector(confrimComment) forControlEvents:UIControlEventTouchUpInside];
+    [self.commentTxtMainView addSubview:confirmBtn];
+    
+    
+    
     
     /**收藏按键*/
     
@@ -212,6 +286,8 @@
     [self.appointmentBtn addTarget:self action:@selector(makeAppointmentImmediately) forControlEvents:UIControlEventTouchUpInside];
     [self.functionView addSubview:self.appointmentBtn];
     
+    
+    
     /**主界面*/
     CGFloat screenW = self.view.frame.size.width - 20;
     
@@ -233,15 +309,14 @@
     self.webView.UIDelegate = self;
     self.webView.scrollView.delegate = self;
     self.webView.navigationDelegate = self;
-    self.webView.scrollView.bounces = NO;
     self.webView.backgroundColor = [UIColor whiteColor];
-    
     
     /**主界面和功能条隐藏*/
     self.functionView.hidden = YES;
     self.webView.hidden = YES;
 
 }
+
 
 - (void) setNetWork{
 
@@ -277,12 +352,27 @@
     // Dispose of any resources that can be recreated.
 }
 
+- (void)webView:(WKWebView *)webView didFinishNavigation:(null_unspecified WKNavigation *)navigation{
+
+
+    __weak CMLActivityDetailVC *vc = self;
+    [self.webView evaluateJavaScript:@"document.body.offsetHeight" completionHandler:^(id _Nullable height, NSError * _Nullable error) {
+        vc.webViewrealHeight = vc.webViewrealHeight + [height floatValue];
+        
+    }];
+
+    
+}
 
 - (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation{
     
     [self stopLoading];
     [self showAlterViewWithText:@"加载失败"];
     
+}
+
+- (UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView {
+    return nil;
 }
 #pragma mark - NetWorkProtocol
 /**网络请求回调*/
@@ -295,6 +385,7 @@
         
         NSData *imageNata = [NSData dataWithContentsOfURL:[NSURL URLWithString:self.obj.retData.coverPic]];
         UIImage *image = [UIImage imageWithData:imageNata];
+        self.shareToSinaImage = image;
         UIImage *transitImage = [UIImage scaleToRect:image];
         self.shareImage = [UIImage scaleToSize:transitImage size:CGSizeMake(60, 60)];
         
@@ -305,19 +396,74 @@
             
             NSData *data =[[NSData alloc] initWithBase64EncodedString:self.obj.retData.content options:0];
             NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-            [self.webView loadHTMLString:str baseURL:nil];
-            self.webBrowserView = self.webView.scrollView.subviews[0];
+
             /**加表头*/
             UIView *headerView = [[UIView alloc] init];
             CGFloat height =[self addSubViewsTo:headerView];
             headerView.frame = CGRectMake(0, -height, self.view.frame.size.width, height);
+            self.webViewrealHeight = -height - self.functionView.frame.size.height;
+            [self.webView loadHTMLString:str baseURL:nil];
+            self.webBrowserView = self.webView.scrollView.subviews[0];
             [UIView animateWithDuration:1 animations:^{
               self.webView.scrollView.contentInset = UIEdgeInsetsMake(height, 0, 0, 0);
             }];
             
             [self.webView.scrollView addSubview:headerView];
+            
             [self.contentView addSubview:self.webView];
+            
+            /**comment*/
+            self.commentTableView = [[UITableView alloc] initWithFrame:CGRectMake(0,
+                                                                                  CGRectGetMaxY(self.contentView.frame),
+                                                                                  self.view.frame.size.width, 1)
+                                                                 style:UITableViewStylePlain];
+            self.commentTableView.delegate = self;
+            self.commentTableView.dataSource = self;
+            self.commentTableView.tableFooterView = [[UIView alloc] init];
+            [self.contentView addSubview:self.commentTableView];
+            
+            UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 20)];
+            UILabel *label = [[UILabel alloc] init];
+            label.text = @"评论";
+            label.font = KSystemFontSize11;
+            [label sizeToFit];
+            label.frame =CGRectMake(36*Proportion,
+                                    view.frame.size.height/2.0 - label.frame.size.height/2.0,
+                                    label.frame.size.width,
+                                    label.frame.size.height);
+            
+            CMLLine *line = [[CMLLine alloc] init];
+            line.startingPoint = CGPointMake(CGRectGetMaxX(label.frame) + 10 , label.center.y);
+            line.directionOfLine = HorizontalLine;
+            line.lineWidth = 0.3;
+            line.LineColor = [UIColor CMLCommentTimeGrayColor];
+            line.lineLength = self.view.frame.size.width - CGRectGetMaxX(label.frame);
+            [view addSubview:line];
+            [view addSubview:label];
+            
+            self.commentTableView.tableHeaderView = view;
+//            self.noCommentLabel = [[UILabel alloc] init];
+//            self.noCommentLabel.textColor = [UIColor CMLCommentTimeGrayColor];
+//            self.noCommentLabel.text = @"暂无评论";
+//            self.noCommentLabel.font = KSystemFontSize13;
+//            [self.noCommentLabel sizeToFit];
+//            self.noCommentLabel.center = CGPointMake(self.contentView.center.x, self.contentView.center.y/4);
+//            [self.commentTableView addSubview:self.noCommentLabel];
+//            self.noCommentLabel.hidden = YES;
+            
+            /**上拉加载*/
+            self.refreshFooter = [[CMLRefreshFooter alloc] init];
+            self.refreshFooter.scrollView = self.commentTableView;
+            [self.refreshFooter footer];
+            __block CMLActivityDetailVC *vc = self;
+            self.refreshFooter.beginRefreshingBlock = ^(){
+                [vc.refreshFooter beginRefreshing];
+                [vc pullToLoadingOfFooter];
+                
+            };
+
             [self.contentView addSubview:self.functionView];
+            
             /**预约按键处理*/
             
             if ([self.obj.retData.isAllowApply intValue] == 2) {
@@ -371,12 +517,32 @@
     }else if ([self.currentApiName isEqualToString:ActivityShare]){
     
        
+    }else if ([self.currentApiName isEqualToString:CommentList]){
+    
+        
+        self.commentrootObj = [BaseResultObj getBaseObjFrom:responseResult];
+        [self.dataArray addObjectsFromArray:self.commentrootObj.retData.dataList];
+        [self.commentTableView reloadData];
+        if (self.dataArray.count>0) {
+            self.noCommentLabel.hidden = YES;
+        }else{
+            self.noCommentLabel.hidden = NO;
+            
+        }
+    
+    }else if ([self.currentApiName isEqualToString:CommentPost]){
+    
+        [self.dataArray removeAllObjects];
+       [self getCommentList:1];
     }
+    
+    [self.refreshFooter endRefreshing];
 }
 
 - (void) requestFailBack:(id)errorResult
              withApiName:(NSString *)apiName{
-    
+
+    [self.refreshFooter endRefreshing];
     [self stopLoading];
     [self showNotData];
 
@@ -511,7 +677,10 @@
     [view addSubview:numOfBrowseCollectionLabel];
     
     
-    UIView *lineView = [[UIView alloc] initWithFrame:CGRectMake(DetailInfoLeftMargin*Proportion, CGRectGetMaxY(numOfBrowseCollectionLabel.frame) + DetailInfoLeftMargin*Proportion , self.view.frame.size.width - 2*DetailInfoLeftMargin*Proportion, 0.3)];
+    UIView *lineView = [[UIView alloc] initWithFrame:CGRectMake(DetailInfoLeftMargin*Proportion,
+                                                                CGRectGetMaxY(numOfBrowseCollectionLabel.frame) + DetailInfoLeftMargin*Proportion ,
+                                                                self.view.frame.size.width - 2*DetailInfoLeftMargin*Proportion,
+                                                                0.3)];
     lineView.backgroundColor = [UIColor CMLLineGrayColor];
     [view addSubview:lineView];
     
@@ -571,12 +740,18 @@
     telephone.font = KSystemFontSize14;
     [telephone sizeToFit];
     
-    UIImageView *telephoneImg = [[UIImageView alloc] initWithFrame:CGRectMake(DetailInfoLeftMargin*Proportion, CGRectGetMaxY(addressLabel.frame) + DetailInfoSpace*Proportion, telephone.frame.size.height, telephone.frame.size.height)];
+    UIImageView *telephoneImg = [[UIImageView alloc] initWithFrame:CGRectMake(DetailInfoLeftMargin*Proportion,
+                                                                              CGRectGetMaxY(addressLabel.frame) + DetailInfoSpace*Proportion,
+                                                                              telephone.frame.size.height,
+                                                                              telephone.frame.size.height)];
     telephoneImg.image = [UIImage imageNamed:KActivityNumImg];
     telephoneImg.alpha = 0.6;
     [view addSubview:telephoneImg];
     
-    telephone.frame = CGRectMake(CGRectGetMaxX(telephoneImg.frame) + DetailInfoSpace*Proportion, telephoneImg.frame.origin.y, telephone.frame.size.width, telephone.frame.size.height);
+    telephone.frame = CGRectMake(CGRectGetMaxX(telephoneImg.frame) + DetailInfoSpace*Proportion,
+                                 telephoneImg.frame.origin.y,
+                                 telephone.frame.size.width,
+                                 telephone.frame.size.height);
     [view addSubview:telephone];
     
     
@@ -597,10 +772,12 @@
 - (void) shareCurrentPage{
 
     self.textFieldBigBGView = [[UIView alloc] initWithFrame:self.contentView.bounds];
-    self.textFieldBigBGView.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.4];
     [self.contentView addSubview:self.textFieldBigBGView];
-
-    [self.commentTextField becomeFirstResponder];
+    self.textFieldBigBGView.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.4];
+    
+    [self.contentView addSubview:self.commentTxtMainView];
+    
+    [self.commentTextView becomeFirstResponder];
 
 }
 
@@ -622,7 +799,10 @@
     self.shareMainBgView.backgroundColor = [UIColor whiteColor];
     [self.shareBigBGView addSubview:self.shareMainBgView];
     
-    UIButton *cancelBtn = [[UIButton alloc] initWithFrame:CGRectMake(0, Proportion*(ShareMainViewHeight - CancelShareBtnHeight), self.view.frame.size.width, CancelShareBtnHeight*Proportion)];
+    UIButton *cancelBtn = [[UIButton alloc] initWithFrame:CGRectMake(0,
+                                                                     Proportion*(ShareMainViewHeight - CancelShareBtnHeight),
+                                                                     self.view.frame.size.width,
+                                                                     CancelShareBtnHeight*Proportion)];
     [cancelBtn setTitle:@"取消" forState:UIControlStateNormal];
     cancelBtn.titleLabel.font = KSystemFontSize13;
     [cancelBtn setTitleColor:[UIColor CMLInputTextGrayColor] forState:UIControlStateNormal];
@@ -637,7 +817,10 @@
     line.LineColor = [UIColor CMLLineGrayColor];
     [self.shareMainBgView addSubview:line];
     
-    UIButton *converseBtn = [[UIButton alloc] initWithFrame:CGRectMake(FriendsShareLeftMargin*Proportion, ShareBtnTopMargin*Proportion, ShareBtnWidthAndHeight*Proportion, ShareBtnWidthAndHeight*Proportion)];
+    UIButton *converseBtn = [[UIButton alloc] initWithFrame:CGRectMake(FriendsShareLeftMargin*Proportion,
+                                                                       ShareBtnTopMargin*Proportion,
+                                                                       ShareBtnWidthAndHeight*Proportion,
+                                                                       ShareBtnWidthAndHeight*Proportion)];
     [converseBtn addTarget:self action:@selector(shareToConverse) forControlEvents:UIControlEventTouchUpInside];
     [converseBtn setBackgroundImage:[UIImage imageNamed:KShareToConverImg] forState:UIControlStateNormal];
     [self.shareMainBgView addSubview:converseBtn];
@@ -647,10 +830,16 @@
     converLabel.text = @"微信好友";
     converLabel.textColor = [UIColor CMLTabBarItemGrayColor];
     [converLabel sizeToFit];
-    converLabel.frame = CGRectMake(converseBtn.center.x - converLabel.frame.size.width/2.0, CGRectGetMaxY(converseBtn.frame) + ShareTypeNameTopMargin*Proportion, converLabel.frame.size.width, converLabel.frame.size.height);
+    converLabel.frame = CGRectMake(converseBtn.center.x - converLabel.frame.size.width/2.0,
+                                   CGRectGetMaxY(converseBtn.frame) + ShareTypeNameTopMargin*Proportion,
+                                   converLabel.frame.size.width,
+                                   converLabel.frame.size.height);
     [self.shareMainBgView addSubview:converLabel];
     
-    UIButton *friendsBtn = [[UIButton alloc] initWithFrame:CGRectMake(CGRectGetMaxX(converseBtn.frame) + ShareBtnSpace*Proportion,ShareBtnTopMargin*Proportion , ShareBtnWidthAndHeight*Proportion, ShareBtnWidthAndHeight*Proportion)];
+    UIButton *friendsBtn = [[UIButton alloc] initWithFrame:CGRectMake(CGRectGetMaxX(converseBtn.frame) + ShareBtnSpace*Proportion,
+                                                                      ShareBtnTopMargin*Proportion ,
+                                                                      ShareBtnWidthAndHeight*Proportion,
+                                                                      ShareBtnWidthAndHeight*Proportion)];
     [friendsBtn addTarget:self action:@selector(shareToCircleOfFriends) forControlEvents:UIControlEventTouchUpInside];
     [friendsBtn setBackgroundImage:[UIImage imageNamed:KShareToCircleImg] forState:UIControlStateNormal];
     [self.shareMainBgView addSubview:friendsBtn];
@@ -660,8 +849,30 @@
     circleOfFriendsLabel.text = @"朋友圈";
     circleOfFriendsLabel.textColor = [UIColor CMLTabBarItemGrayColor];
     [circleOfFriendsLabel sizeToFit];
-    circleOfFriendsLabel.frame = CGRectMake(friendsBtn.center.x - circleOfFriendsLabel.frame.size.width/2.0, CGRectGetMaxY(friendsBtn.frame) + ShareTypeNameTopMargin*Proportion, circleOfFriendsLabel.frame.size.width, circleOfFriendsLabel.frame.size.height);
+    circleOfFriendsLabel.frame = CGRectMake(friendsBtn.center.x - circleOfFriendsLabel.frame.size.width/2.0,
+                                            CGRectGetMaxY(friendsBtn.frame) + ShareTypeNameTopMargin*Proportion,
+                                            circleOfFriendsLabel.frame.size.width,
+                                            circleOfFriendsLabel.frame.size.height);
     [self.shareMainBgView addSubview:circleOfFriendsLabel];
+    
+    UIButton *weiboBtn = [[UIButton alloc] initWithFrame:CGRectMake(CGRectGetMaxX(friendsBtn.frame) + ShareBtnSpace*Proportion,
+                                                                   ShareBtnTopMargin*Proportion,
+                                                                   ShareBtnWidthAndHeight*Proportion,
+                                                                    ShareBtnWidthAndHeight*Proportion)];
+    [weiboBtn setBackgroundImage:[UIImage imageNamed:KShareToweiboImg] forState:UIControlStateNormal];
+    [weiboBtn addTarget:self action:@selector(shareToWeibo) forControlEvents:UIControlEventTouchUpInside];
+    [self.shareMainBgView addSubview:weiboBtn];
+    UILabel *weiboLabel = [[UILabel alloc]init];
+    weiboLabel.font = KSystemFontSize9;
+    weiboLabel.text = @"新浪微博";
+    weiboLabel.textColor = [UIColor CMLTabBarItemGrayColor];
+    [weiboLabel sizeToFit];
+    weiboLabel.frame = CGRectMake(weiboBtn.center.x - weiboLabel.frame.size.width/2.0,
+                                            CGRectGetMaxY(friendsBtn.frame) + ShareTypeNameTopMargin*Proportion,
+                                            weiboLabel.frame.size.width,
+                                            weiboLabel.frame.size.height);
+    [self.shareMainBgView addSubview:weiboLabel];
+    
     
     
     [UIView animateWithDuration:0.2 animations:^{
@@ -682,7 +893,7 @@
 - (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
     
     /**评论时的界面处理*/
-    [self.commentTextField resignFirstResponder];
+    [self.commentTextView resignFirstResponder];
     [UIView animateWithDuration:1 animations:^{
         self.textFieldBigBGView.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0];
     } completion:^(BOOL finished) {
@@ -713,47 +924,55 @@
 }
 
 - (void) shareToConverse{
-    
-    WXMediaMessage *message = [WXMediaMessage message];
-    message.title = self.obj.retData.title;
-    message.description = self.obj.retData.briefIntro;
-    [message setThumbImage:self.shareImage];
-    
-    WXWebpageObject *webObject = [WXWebpageObject object];
-    webObject.webpageUrl = self.obj.retData.shareLink;
-    message.mediaObject = webObject;
-    
-    SendMessageToWXReq *req = [[SendMessageToWXReq alloc] init];
-    req.bText = NO;
-    req.message = message;
-    req.scene = WXSceneSession;
-    BOOL isSend = [WXApi sendReq:req];
-    
-    if (isSend) {
-        [self sendShareAction];
+
+    if (self.obj.retData.shareLink) {
+       [UMSocialData defaultData].extConfig.wechatSessionData.url = self.obj.retData.shareLink;
     }
+    
+    [[UMSocialDataService defaultDataService] postSNSWithTypes:@[UMShareToWechatSession] content:self.obj.retData.title image:self.shareImage location:nil urlResource:nil presentedController:self completion:^(UMSocialResponseEntity * response){
+        if (response.responseCode == UMSResponseCodeSuccess) {
+            UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"提示信息" message:@"分享成功" delegate:nil cancelButtonTitle:@"好" otherButtonTitles:nil];
+            [alertView show];
+            [self sendShareAction];
+        } else if(response.responseCode != UMSResponseCodeCancel) {
+            UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"提示信息" message:@"分享失败" delegate:nil cancelButtonTitle:@"好" otherButtonTitles:nil];
+            [alertView show];
+        }
+    }];
 }
 
 - (void) shareToCircleOfFriends{
     
-    WXMediaMessage *message = [WXMediaMessage message];
-    message.title = self.obj.retData.title;
-    message.description = self.obj.retData.briefIntro;
-    [message setThumbImage:self.shareImage];
-    
-    WXWebpageObject *webObject = [WXWebpageObject object];
-    webObject.webpageUrl = self.obj.retData.shareLink;
-    message.mediaObject = webObject;
-    
-    SendMessageToWXReq *req = [[SendMessageToWXReq alloc] init];
-    req.bText = NO;
-    req.message = message;
-    req.scene = WXSceneTimeline;
-    BOOL isSend = [WXApi sendReq:req];
-    if (isSend) {
-        [self sendShareAction];
+    if (self.obj.retData.shareLink) {
+        [UMSocialData defaultData].extConfig.wechatSessionData.url = self.obj.retData.shareLink;
     }
     
+    [[UMSocialDataService defaultDataService] postSNSWithTypes:@[UMShareToWechatTimeline] content:self.obj.retData.title image:self.shareImage location:nil urlResource:nil presentedController:self completion:^(UMSocialResponseEntity * response){
+        if (response.responseCode == UMSResponseCodeSuccess) {
+            UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"提示信息" message:@"分享成功" delegate:nil cancelButtonTitle:@"好" otherButtonTitles:nil];
+            [alertView show];
+            [self sendShareAction];
+        } else if(response.responseCode != UMSResponseCodeCancel) {
+            UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"提示信息" message:@"分享失败" delegate:nil cancelButtonTitle:@"好" otherButtonTitles:nil];
+            [alertView show];
+        }
+    }];
+    
+}
+
+- (void) shareToWeibo {
+
+    [[UMSocialDataService defaultDataService]  postSNSWithTypes:@[UMShareToSina] content:[NSString stringWithFormat:@"%@,%@",self.obj.retData.title,self.obj.retData.shareLink] image:self.shareToSinaImage location:nil urlResource:nil presentedController:self completion:^(UMSocialResponseEntity *shareResponse){
+        if (shareResponse.responseCode == UMSResponseCodeSuccess) {
+            UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"提示信息" message:@"分享成功" delegate:nil cancelButtonTitle:@"好" otherButtonTitles:nil];
+            [alertView show];
+            [self sendShareAction];
+        } else if(shareResponse.responseCode != UMSResponseCodeCancel) {
+            UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"提示信息" message:@"分享失败" delegate:nil cancelButtonTitle:@"好" otherButtonTitles:nil];
+            [alertView show];
+        }
+    }];
+
 }
 
 - (void) cancelShare {
@@ -806,30 +1025,232 @@
 
 - (void) didSelectedRightBarItem {
 
-    [self.commentTextField resignFirstResponder];
+    [self.commentTextView resignFirstResponder];
     [self showShareViewWithShareModel];
 
 }
 
 - (void) didSelectedLeftBarItem{
     
-    [self.commentTextField resignFirstResponder];
+    [self.commentTextView resignFirstResponder];
     [[VCManger mainVC] dismissCurrentVC];
     
 }
 
 #pragma mark - 监控键盘的高度
 - (void)keyboardWasShown:(NSNotification*)aNotification{
- 
-    
 
+    NSDictionary* info = [aNotification userInfo];
+    CGSize kbSize = [[info objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue].size;
+    [UIView animateWithDuration:0.25 animations:^{
+        
+        self.commentTxtMainView.frame = CGRectMake(0,
+                                                   self.contentView.frame.size.height - kbSize.height - InputViewHeight*Proportion - commentBtnHeight*Proportion,
+                                                   self.view.frame.size.width,
+                                                   InputViewHeight*Proportion + commentBtnHeight*Proportion);
+    }];
+    
 }
 
 
 
 -(void)keyboardWillBeHidden:(NSNotification*)aNotification{
-    
+ 
+
+    [UIView animateWithDuration:0.25 animations:^{
+        
+        self.commentTxtMainView.frame = CGRectMake(0,
+                                                CGRectGetMaxY(self.contentView.frame),
+                                                self.view.frame.size.width,
+                                                InputViewHeight*Proportion + commentBtnHeight*Proportion);
+    }];
 
     
 }
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView{
+
+    if (self.currentOffSet != self.webView.scrollView.contentOffset.y) {
+        self.currentOffSet = self.webView.scrollView.contentOffset.y;
+        
+    }
+}
+
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate{
+
+    /**评论的出现及隐藏*/
+    if (self.webViewrealHeight > 0) {
+        
+        if (self.currentOffSet >= self.webViewrealHeight) {
+            [self showCommentView];
+        }
+    }
+    
+    if (self.commentTableView.contentOffset.y < 0) {
+        [self hiddenCommentView];
+    }
+
+}
+#pragma mark - UITableViewDataSource
+
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+
+    if (self.commentrootObj) {
+        CMLCommentListTVCell *cell = (CMLCommentListTVCell *)[self tableView:self.commentTableView cellForRowAtIndexPath:indexPath];
+        CommentObj *obj =  [CommentObj getBaseObjFrom:self.dataArray[indexPath.row]];
+        cell.imageUrl = obj.userHeadImg;
+        cell.nickName = obj.userNickName;
+        cell.commentContent = obj.comment;
+        cell.publishTime = obj.postTimeStr;
+        CGFloat rowHeight = [cell refreshTableViewCell];
+        return rowHeight;
+    }else{
+        return 0;
+    }
+    
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+
+    if (self.dataArray.count>0) {
+        return self.dataArray.count;
+    }else{
+        return 0;
+    }
+    
+}
+
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
+
+    static NSString *identifier = @"tableViewCell";
+    CMLCommentListTVCell *cell = [tableView dequeueReusableCellWithIdentifier:identifier];
+    
+    if (!cell) {
+        cell = [[CMLCommentListTVCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:identifier];
+        cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    }
+
+    if (self.dataArray>0) {
+        CommentObj *obj =  [CommentObj getBaseObjFrom:self.dataArray[indexPath.row]];
+        cell.imageUrl = obj.userHeadImg;
+        cell.nickName = obj.userNickName;
+        cell.commentContent = obj.comment;
+        cell.publishTime = obj.postTimeStr;
+        [cell refreshTableViewCell];
+        
+    }
+    return cell;
+}
+
+- (void) showCommentView{
+
+    [UIView animateWithDuration:0.2 animations:^{
+       
+        self.commentTableView.frame = CGRectMake(0,
+                                                 CGRectGetMaxY(self.navBar.frame),
+                                                 self.view.frame.size.width,
+                                                 self.contentView.frame.size.height - self.functionView.frame.size.height - self.navBar.frame.size.height);
+    }];
+    [self.dataArray removeAllObjects];
+    [self getCommentList:1];
+    
+    
+    
+    
+}
+
+- (void) hiddenCommentView{
+
+    [UIView animateWithDuration:0.2 animations:^{
+       
+        self.commentTableView.frame = CGRectMake(0,
+                                                 CGRectGetMaxY(self.contentView.frame),
+                                                 self.view.frame.size.width,
+                                                 self.contentView.frame.size.height - self.functionView.frame.size.height - self.navBar.frame.size.height);
+    }];
+    
+}
+
+- (void) getCommentList:(int) page{
+
+    
+    NetWorkDelegate *delegate = [[NetWorkDelegate alloc] init];
+    delegate.delegate = self;
+    NSMutableDictionary *paraDic = [NSMutableDictionary dictionary];
+    [paraDic setObject:self.obj.retData.currentID forKey:@"objId"];
+    [paraDic setObject:[NSNumber numberWithInt:2] forKey:@"objType"];
+    [paraDic setObject: [NSNumber numberWithInt:PageSize] forKey:@"pageSize"];
+    [paraDic setObject:[NSNumber numberWithInt:page] forKey:@"page"];
+    NSString *skey = [[DataManager lightData] readSkey];
+    [paraDic setObject:skey forKey:@"skey"];
+    NSNumber *reqTime = [NSNumber numberWithInt:[AppGroup getCurrentDate]];
+    [paraDic setObject:reqTime forKey:@"reqTime"];
+    NSString *hashToken = [NSString getEncryptStringfrom:@[self.obj.retData.currentID,[NSNumber numberWithInt:2],reqTime,skey]];
+    [paraDic setObject:hashToken forKey:@"hashToken"];
+    
+    [NetWorkTask postResquestWithApiName:CommentList paraDic:paraDic delegate:delegate];
+    self.currentApiName = CommentList;
+
+
+}
+
+- (void) cancelComment{
+
+    self.commentTextView.text = @"";
+    [self.commentTextView resignFirstResponder];
+    [UIView animateWithDuration:1 animations:^{
+        self.textFieldBigBGView.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0];
+    } completion:^(BOOL finished) {
+        [self.textFieldBigBGView removeFromSuperview];
+    }];
+    
+
+}
+
+- (void) confrimComment{
+
+    if (self.commentTextView.text.length <= 0) {
+        [self cancelComment];
+        
+    }else{
+    
+        NetWorkDelegate *delegate = [[NetWorkDelegate alloc] init];
+        delegate.delegate = self;
+        NSMutableDictionary *paraDic = [NSMutableDictionary dictionary];
+        [paraDic setObject:self.obj.retData.currentID forKey:@"objId"];
+        [paraDic setObject:[NSNumber numberWithInt:2] forKey:@"objType"];
+        [paraDic setObject:self.commentTextView.text forKey:@"comment"];
+        NSString *skey = [[DataManager lightData] readSkey];
+        [paraDic setObject:skey forKey:@"skey"];
+        NSNumber *reqTime = [NSNumber numberWithInt:[AppGroup getCurrentDate]];
+        [paraDic setObject:reqTime forKey:@"reqTime"];
+        NSString *hashToken = [NSString getEncryptStringfrom:@[self.obj.retData.currentID,[NSNumber numberWithInt:2],reqTime,skey]];
+        [paraDic setObject:hashToken forKey:@"hashToken"];
+        
+        NSString *commhash =[NSString stringWithFormat:@"%@%@%@",self.commentTextView.text,skey,reqTime];
+        [paraDic setObject:[commhash md5] forKey:@"commentHash"];
+        [NetWorkTask postResquestWithApiName:CommentPost paraDic:paraDic delegate:delegate];
+        self.currentApiName = CommentPost;
+        [self cancelComment];
+    }
+}
+
+- (void) pullToLoadingOfFooter{
+
+    if (self.dataArray.count%20 == 0) {
+        if (self.dataArray.count != [self.commentrootObj.retData.dataCount intValue]) {
+            self.page++;
+            [self getCommentList:self.page];
+        }else{
+            [self.refreshFooter endRefreshing];
+        }
+    }else{
+        
+        [self.refreshFooter endRefreshing];
+    }
+
+}
+
 @end

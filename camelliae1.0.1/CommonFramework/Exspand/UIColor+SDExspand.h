@@ -27,4 +27,7 @@
 
 /**home*/
 + (UIColor *)CMLTabBarItemGrayColor;
+
+/**commentTime*/
++ (UIColor *)CMLCommentTimeGrayColor;
 @end

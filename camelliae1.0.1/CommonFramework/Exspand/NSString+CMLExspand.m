@@ -6,10 +6,28 @@
 //  Copyright © 2016年 张越. All rights reserved.
 //
 
+#import <CommonCrypto/CommonDigest.h>
 #import "NSString+CMLExspand.h"
 #import "CMLRSAModule.h"
 #import "NetConfig.h"
 @implementation NSString (CMLExspand)
+
+- (NSString *)md5
+{
+    NSData *data = [self dataUsingEncoding:NSUTF8StringEncoding];
+    uint8_t digest[CC_MD5_DIGEST_LENGTH];
+    
+    CC_MD5(data.bytes, [NSNumber numberWithInteger:data.length].intValue, digest);
+    
+    NSMutableString *output = [NSMutableString stringWithCapacity:CC_MD5_DIGEST_LENGTH * 2];
+    
+    for (int i = 0; i < CC_MD5_DIGEST_LENGTH; i++)
+    {
+        [output appendFormat:@"%02x", digest[i]];
+    }
+    
+    return output;
+}
 
 /**获取字符串font下的CGsize*/
 - (CGSize) sizeWithFontCompatible:(UIFont *) font{

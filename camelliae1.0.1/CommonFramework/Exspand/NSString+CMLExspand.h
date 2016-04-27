@@ -11,6 +11,7 @@
 
 @interface NSString (CMLExspand)
 
+- (NSString *)md5;
 /**获取字符串font下的CGsize*/
 - (CGSize) sizeWithFontCompatible:(UIFont *) font;
 

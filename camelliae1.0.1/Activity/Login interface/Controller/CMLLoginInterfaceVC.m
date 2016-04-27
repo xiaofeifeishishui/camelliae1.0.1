@@ -208,7 +208,7 @@
             
             NSMutableDictionary *paraDic = [NSMutableDictionary dictionary];
             [paraDic setObject:self.accountTextField.text forKey:@"mobile"];
-            [paraDic setObject:self.codeTextField.text forKey:@"password"];
+            [paraDic setObject:[NSString getEncryptStringfrom:@[self.codeTextField.text]] forKey:@"password"];
             [paraDic setObject:@"0" forKey:@"smsCode"];
             NSString *skey = [[DataManager lightData] readSkey];
             NSString *hashToken = [NSString getEncryptStringfrom:@[self.accountTextField.text,

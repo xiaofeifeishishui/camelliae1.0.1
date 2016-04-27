@@ -81,7 +81,7 @@
 #define KNotDataImg                  @"notData.png"
 #define KCollectBtnImg               @"collect.png"
 #define KCollectedBtnImg             @"collected.png"
-#define KShareBtnImg                 @"share.png"
+#define KFeedbackImg                 @"feedback.png"
 #define KActivityDetailTimeImg       @"history.png"
 #define KActivityDetailAddressImg    @"location.png"
 #define KActivityNumImg              @"call.png"
@@ -91,7 +91,9 @@
 #define KNotDataBackgroundImg        @"noDataBackground.png"
 #define KShareToConverImg            @"shareOfConver.png"
 #define KShareToCircleImg            @"shareOfCircle.png"
+#define KShareToweiboImg             @"weibo.png"
 #define KWhiteShareImg               @"whiteShare.png"
+#define KBlackShareImg               @"share.png"
 
 #define KOlympicImg                  @"Olympic.png"
 #define KGaNaImg                     @"gana.jpg"

@@ -28,7 +28,7 @@
 #import "CMLLine.h"
 #import "WXApi.h"
 #import "UIImage+CMLExspand.h"
-
+#import "UMSocial.h"
 
 #define Duration                  0.5f
 #define FunctionViewHeight        83
@@ -74,6 +74,8 @@
 @property (nonatomic,strong) UIView *shareMainBgView;
 
 @property (nonatomic,strong) UIImage *shareImage;
+
+@property (nonatomic,strong) UIImage *shareToSinaImage;
 
 
 @end
@@ -198,6 +200,7 @@
         
         NSData *imageNata = [NSData dataWithContentsOfURL:[NSURL URLWithString:self.obj.retData.coverPic]];
         UIImage *image = [UIImage imageWithData:imageNata];
+        self.shareToSinaImage = image;
         UIImage *transitImage = [UIImage scaleToRect:image];
         self.shareImage = [UIImage scaleToSize:transitImage size:CGSizeMake(60, 60)];
         
@@ -376,6 +379,24 @@
     circleOfFriendsLabel.frame = CGRectMake(friendsBtn.center.x - circleOfFriendsLabel.frame.size.width/2.0, CGRectGetMaxY(friendsBtn.frame) + ShareTypeNameTopMargin*Proportion, circleOfFriendsLabel.frame.size.width, circleOfFriendsLabel.frame.size.height);
     [self.shareMainBgView addSubview:circleOfFriendsLabel];
     
+    UIButton *weiboBtn = [[UIButton alloc] initWithFrame:CGRectMake(CGRectGetMaxX(friendsBtn.frame) + ShareBtnSpace*Proportion,
+                                                                    ShareBtnTopMargin*Proportion,
+                                                                    ShareBtnWidthAndHeight*Proportion,
+                                                                    ShareBtnWidthAndHeight*Proportion)];
+    [weiboBtn setBackgroundImage:[UIImage imageNamed:KShareToweiboImg] forState:UIControlStateNormal];
+    [weiboBtn addTarget:self action:@selector(shareToWeibo) forControlEvents:UIControlEventTouchUpInside];
+    [self.shareMainBgView addSubview:weiboBtn];
+    UILabel *weiboLabel = [[UILabel alloc]init];
+    weiboLabel.font = KSystemFontSize9;
+    weiboLabel.text = @"新浪微博";
+    weiboLabel.textColor = [UIColor CMLTabBarItemGrayColor];
+    [weiboLabel sizeToFit];
+    weiboLabel.frame = CGRectMake(weiboBtn.center.x - weiboLabel.frame.size.width/2.0,
+                                  CGRectGetMaxY(friendsBtn.frame) + ShareTypeNameTopMargin*Proportion,
+                                  weiboLabel.frame.size.width,
+                                  weiboLabel.frame.size.height);
+    [self.shareMainBgView addSubview:weiboLabel];
+    
     
     [UIView animateWithDuration:0.2 animations:^{
         
@@ -418,48 +439,56 @@
 }
 
 - (void) shareToConverse{
-
-    WXMediaMessage *message = [WXMediaMessage message];
-    message.title = self.obj.retData.title;
-    message.description = self.obj.retData.briefIntro;
-
-    [message setThumbImage: self.shareImage];
-    WXWebpageObject *webObject = [WXWebpageObject object];
-    webObject.webpageUrl = self.obj.retData.shareLink;
-    message.mediaObject = webObject;
     
-    SendMessageToWXReq *req = [[SendMessageToWXReq alloc] init];
-    req.bText = NO;
-    req.message = message;
-    req.scene = WXSceneSession;
-    BOOL isSend =[WXApi sendReq:req];
-    
-    if (isSend) {
-        [self sendShareAction];
+    if (self.obj.retData.shareLink) {
+        [UMSocialData defaultData].extConfig.wechatSessionData.url = self.obj.retData.shareLink;
     }
+    
+    [[UMSocialDataService defaultDataService] postSNSWithTypes:@[UMShareToWechatSession] content:self.obj.retData.title image:self.shareImage location:nil urlResource:nil presentedController:self completion:^(UMSocialResponseEntity * response){
+        if (response.responseCode == UMSResponseCodeSuccess) {
+            UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"提示信息" message:@"分享成功" delegate:nil cancelButtonTitle:@"好" otherButtonTitles:nil];
+            [alertView show];
+            [self sendShareAction];
+        } else if(response.responseCode != UMSResponseCodeCancel) {
+            UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"提示信息" message:@"分享失败" delegate:nil cancelButtonTitle:@"好" otherButtonTitles:nil];
+            [alertView show];
+        }
+    }];
 }
 
 - (void) shareToCircleOfFriends{
-
-    WXMediaMessage *message = [WXMediaMessage message];
-    message.title = self.obj.retData.title;
-    message.description = self.obj.retData.briefIntro;
-    [message setThumbImage:self.shareImage];
     
-    WXWebpageObject *webObject = [WXWebpageObject object];
-    webObject.webpageUrl = self.obj.retData.shareLink;
-    message.mediaObject = webObject;
-    
-    SendMessageToWXReq *req = [[SendMessageToWXReq alloc] init];
-    req.bText = NO;
-    req.message = message;
-    req.scene = WXSceneTimeline;
-    BOOL isSend =[WXApi sendReq:req];
-    
-    if (isSend) {
-        [self sendShareAction];
+    if (self.obj.retData.shareLink) {
+        [UMSocialData defaultData].extConfig.wechatSessionData.url = self.obj.retData.shareLink;
     }
+    
+    [[UMSocialDataService defaultDataService] postSNSWithTypes:@[UMShareToWechatTimeline] content:self.obj.retData.title image:self.shareImage location:nil urlResource:nil presentedController:self completion:^(UMSocialResponseEntity * response){
+        if (response.responseCode == UMSResponseCodeSuccess) {
+            UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"提示信息" message:@"分享成功" delegate:nil cancelButtonTitle:@"好" otherButtonTitles:nil];
+            [alertView show];
+            [self sendShareAction];
+        } else if(response.responseCode != UMSResponseCodeCancel) {
+            UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"提示信息" message:@"分享失败" delegate:nil cancelButtonTitle:@"好" otherButtonTitles:nil];
+            [alertView show];
+        }
+    }];
+    
+}
 
+- (void) shareToWeibo {
+    
+    [[UMSocialData defaultData].extConfig.wechatSessionData.urlResource setResourceType:UMSocialUrlResourceTypeWeb url:self.obj.retData.shareLink];
+    [[UMSocialDataService defaultDataService]  postSNSWithTypes:@[UMShareToSina] content:[NSString stringWithFormat:@"%@,%@",self.obj.retData.title,self.obj.retData.shareLink] image:self.shareToSinaImage location:nil urlResource:nil presentedController:self completion:^(UMSocialResponseEntity *shareResponse){
+        if (shareResponse.responseCode == UMSResponseCodeSuccess) {
+            UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"提示信息" message:@"分享成功" delegate:nil cancelButtonTitle:@"好" otherButtonTitles:nil];
+            [alertView show];
+            [self sendShareAction];
+        } else if(shareResponse.responseCode != UMSResponseCodeCancel) {
+            UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"提示信息" message:@"分享失败" delegate:nil cancelButtonTitle:@"好" otherButtonTitles:nil];
+            [alertView show];
+        }
+    }];
+    
 }
 
 - (void) cancelShare {

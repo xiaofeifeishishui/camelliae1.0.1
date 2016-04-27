@@ -23,101 +23,110 @@
 //微信AppSecret
 #define WeiXinAppSecret     @"8088acfdce4382c64f68b423bacd8330"
 
+//新浪
+#define SinaAppID           @"4247094902"
+#define SinaAppSecret       @"1f569c176aec6f14e8e856d336ed9f89"
 //UM
 #define UMAppKey            @"570d27d2e0f55a56eb0007ac"
 
 
 //后段服务器（测试）
-//#define NetWorkApiDomain @"http://fakeapi.camelliae.com/api/"
+#define NetWorkApiDomain @"http://fakeapi.camelliae.com/"
 
 
 //后段服务器(上线)
-#define NetWorkApiDomain @"http://mapi.camelliae.com/api/"
+//#define NetWorkApiDomain @"http://mapi.camelliae.com/"
 
 //启动
-#define AppStarting      @"start-up"
+#define AppStarting      @"api/start-up"
 
 //短信验证
-#define MessageVerify    @"get-sms-token"
+#define MessageVerify    @"api/get-sms-token"
 
 //联合登陆
-#define UniteLogin       @"oauth-login"
+#define UniteLogin       @"api/oauth-login"
 
 //手机号登录
-#define TelephoneLogin   @"mobile-login"
+#define TelephoneLogin   @"user/mobile-login"
 
 //检查用户
-#define CheckUser        @"check-user-exist"
+#define CheckUser        @"api/check-user-exist"
 
 //登出账户
-#define Logout           @"logout"
+#define Logout           @"api/logout"
 
 //获取分类信息
-#define GetType          @"get-type"
+#define GetType          @"api/get-type"
 
 //咨询列表
-#define NewsList         @"news-list"
+#define NewsList         @"api/news-list"
 
 //咨询详情
-#define NewsInfo         @"news-info"
+#define NewsInfo         @"api/news-info"
 
 //活动列表
-#define ActivityList     @"activity-list"
+#define ActivityList     @"api/activity-list"
 
 //活动详情
-#define ActivityInfo     @"activity-info"
+#define ActivityInfo     @"api/activity-info"
 
 //收藏操作
-#define ActivityFav      @"act-fav"
+#define ActivityFav      @"api/act-fav"
 
 //收藏列表
-#define FavList          @"fav-list"
+#define FavList          @"api/fav-list"
 
 //预约操作
-#define ActivitySubscribe @"act-subscribe"
+#define ActivitySubscribe @"api/act-subscribe"
 
 //预约列表
-#define SubscribeList     @"subscribe-list"
+#define SubscribeList     @"api/subscribe-list"
 
 //用户信息更新
-#define UpdateUser        @"update-user"
+#define UpdateUser        @"api/update-user"
 
 //分享操作
-#define ActivityShare     @"act-share"
+#define ActivityShare     @"api/act-share"
 
 
 //feedback
-#define Feedback          @"feedback"
+#define Feedback          @"api/feedback"
 
 //找回密码
-#define FindPassword      @"find-passwd"
+#define FindPassword      @"api/find-passwd"
 
 //服务列表
-#define ProjectList       @"project-list"
+#define ProjectList       @"api/project-list"
 
 //服务详情
-#define ProjectInfo       @"project-info"
+#define ProjectInfo       @"api/project-info"
 
 //服务预定
-#define ServeSubscribe    @"serve-act-subscribe"
+#define ServeSubscribe    @"api/serve-act-subscribe"
 
 //用户预订数据列表
-#define ServeBookList     @"serve-book-list"
+#define ServeBookList     @"api/serve-book-list"
 
 //系统通知
-#define SysNotice          @"sys-notice"
+#define SysNotice          @"api/sys-notice"
 
 //系统通知详情
-#define SysNoticeInfo      @"sys-notice-info"
+#define SysNoticeInfo      @"api/sys-notice-info"
 
 //省份列表
-#define GetProvince        @"get-province"
+#define GetProvince        @"api/get-province"
 
 //头像
-#define UpGravatar         @"up-gravatar"
+#define UpGravatar         @"api/up-gravatar"
 
 //资讯首页类别列表
-#define  NewsRecomm        @"news-recomm"
+#define  NewsRecomm        @"api/news-recomm"
+
+//commentPost
+#define  CommentPost       @"comment/posted"
+
+//commentlist
+#define CommentList        @"comment/list"
 
 
 

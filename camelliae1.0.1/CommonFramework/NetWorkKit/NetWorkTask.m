@@ -67,7 +67,6 @@
                                                         @"text/plain",
                                                         nil];
    
-    
     /**发送post请求*/
      NSString *netType = [self getCurrentNetType];
     /**当有网时才能请求*/

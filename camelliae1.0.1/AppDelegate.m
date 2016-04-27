@@ -12,6 +12,9 @@
 #import "DataManager.h"
 #import "NetConfig.h"
 #import "AppGroup.h"
+#import "UMSocial.h"
+#import "UMSocialWechatHandler.h"
+#import "UMSocialSinaSSOHandler.h"
 @interface AppDelegate ()<WXApiDelegate>
 
 @end
@@ -25,17 +28,26 @@
     
      [NSThread sleepForTimeInterval:1.0];
     [[VCManger mainVC] pushVC:[VCManger homeVC] animate:NO];
+
+    [UMSocialData setAppKey:UMAppKey];
+    [UMSocialWechatHandler setWXAppId:WeiXinAppID appSecret:WeiXinAppSecret url:@"http://www.camelliae.com"];
+    [UMSocialSinaSSOHandler openNewSinaSSOWithAppKey:SinaAppID
+                                              secret:SinaAppSecret
+                                         RedirectURL:@"http://sns.whalecloud.com/sina2/callback"];
     
-    [WXApi registerApp:WeiXinAppID];
+     [UMSocialConfig hiddenNotInstallPlatforms:@[UMShareToWechatTimeline,UMShareToWechatSession]];
+    
     return YES;
 }
 
-- (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url {
-    return  [WXApi handleOpenURL:url delegate:self];
+/**这里处理新浪微博SSO授权之后跳转回来，和微信分享完成之后跳转回来*/
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation{
+    return  [UMSocialSnsService handleOpenURL:url wxApiDelegate:nil];
 }
 
-- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
-    return [WXApi handleOpenURL:url delegate:self];
+/**这里处理新浪微博SSO授权进入新浪微博客户端后进入后台，再返回原来应用*/
+- (void)applicationDidBecomeActive:(UIApplication *)application{
+    [UMSocialSnsService  applicationDidBecomeActive];
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application {
@@ -50,10 +62,6 @@
 
 - (void)applicationWillEnterForeground:(UIApplication *)application {
     // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
-}
-
-- (void)applicationDidBecomeActive:(UIApplication *)application {
-    // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application {
