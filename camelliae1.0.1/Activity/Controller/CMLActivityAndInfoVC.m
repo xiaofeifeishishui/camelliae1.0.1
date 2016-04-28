@@ -23,7 +23,6 @@
 #import "CMLMainPageTVCell.h"
 #import "UIScrollView+RefreshHeader.h"
 #import "CMLLine.h"
-#import "CMLRefreshFooter.h"
 #import "UIColor+SDExspand.h"
 #import "CMLCityChooseVC.h"
 #import "CMLSettingVC.h"
@@ -42,6 +41,7 @@
 #import "CMLServeModuleModel.h"
 #import "CMLServiceModuleBtn.h"
 #import "CMLInformationSecondVC.h"
+#import "MJRefresh.h"
 
 #define CMLExerciseTopViewHeight   88
 #define TabBarViewHeight           98
@@ -78,8 +78,6 @@
 @property (nonatomic,strong) UIButton *userHeadBtn;
 
 @property (nonatomic,strong) UIImageView *userImage;
-
-@property (nonatomic,strong) CMLRefreshFooter *refreshFooter;
 
 @property (nonatomic,assign) NSInteger page;
 
@@ -193,17 +191,14 @@
     [self.mainTableView addPullToRefreshWithPullText:@"CAMELLIAE" pullTextColor:[UIColor blackColor] pullTextFont: KSystemFontSize16 refreshingText:@"Loading...." refreshingTextColor:[UIColor blackColor] refreshingTextFont:KSystemFontSize16 action:^{
         [weakSelf pullRefreshOfHeader];
     }];
-    /**上拉加载*/
-    self.refreshFooter = [[CMLRefreshFooter alloc] init];
-    self.refreshFooter.scrollView = self.mainTableView;
-    [self.refreshFooter footer];
-    __block CMLActivityAndInfoVC *vc = self;
-    self.refreshFooter.beginRefreshingBlock = ^(){
-        [vc.refreshFooter beginRefreshing];
-        [vc pullToLoadingOfFooter];
-        
-    };
 
+    self.mainTableView.mj_footer = [MJRefreshBackNormalFooter footerWithRefreshingTarget:self refreshingAction:@selector(loadMoreData)];
+
+}
+
+- (void) loadMoreData{
+    [self pullToLoadingOfFooter];
+    
 }
 #pragma mark - 设置个人中心
 
@@ -486,7 +481,10 @@
         });
         
     }
-    [self.refreshFooter endRefreshing];
+    if ([baseObj.retData.dataCount intValue] == self.activityArray.count) {
+        [self.mainTableView.mj_footer endRefreshing];
+    }
+    
     [self stopLoading];
 }
 
@@ -494,7 +492,6 @@
              withApiName:(NSString *)apiName{
     /**无网络状态直接结束*/
     [self.mainTableView finishLoading];
-    [self.refreshFooter endRefreshing];
     [self stopLoading];
     
 
@@ -561,12 +558,12 @@
             [self getDataListWith:ActivityListRequest AndPage:(int)self.page];
 
         }else{
-            [self.refreshFooter endRefreshing];
+            [self.mainTableView.mj_footer endRefreshing];
         }
         
     }else{
         
-        [self.refreshFooter endRefreshing];
+        [self.mainTableView.mj_footer endRefreshing];
         
     }
 }

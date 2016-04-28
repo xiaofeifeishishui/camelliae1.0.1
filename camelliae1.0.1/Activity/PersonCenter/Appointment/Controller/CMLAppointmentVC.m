@@ -25,7 +25,7 @@
 #import "CMLActivityDetailVC.h"
 #import "CMLServeDetailVC.h"
 #import "UIScrollView+RefreshHeader.h"
-#import "CMLRefreshFooter.h"
+#import "MJRefresh.h"
 
 #define ChooseBtnHeight   44
 #define RowHeight         202
@@ -48,8 +48,6 @@
 @property (nonatomic,assign) int page;
 
 @property (nonatomic,strong) NSNumber *dataCount;
-
-@property (nonatomic,strong) CMLRefreshFooter *refreshFooter;
 
 @end
 
@@ -128,20 +126,16 @@
         [weakSelf pullRefreshOfHeader];
     }];
     
-    self.refreshFooter = [[CMLRefreshFooter alloc] init];
-    self.refreshFooter.scrollView = self.mainTableView;
-    [self.refreshFooter footer];
     
     /**上拉*/
-    __block CMLAppointmentVC *vc = self;
-    self.refreshFooter.beginRefreshingBlock = ^(){
-        
-        [vc.refreshFooter beginRefreshing];
-        [vc pullToLoadingOfFooter];
-        
-    };
+    self.mainTableView.mj_footer = [MJRefreshBackNormalFooter footerWithRefreshingTarget:self refreshingAction:@selector(loadMoreData)];
     
 
+}
+
+- (void) loadMoreData{
+    [self pullToLoadingOfFooter];
+    
 }
 
 - (void) loadData{
@@ -221,10 +215,10 @@
     
     BaseResultObj *obj = [BaseResultObj getBaseObjFrom:responseResult];
     
-    self.dataCount = obj.retData.dataCount;
     
     if ([self.currentApiName isEqualToString:SubscribeList]) {
-      
+    
+        self.dataCount = obj.retData.dataCount;
         if (self.isActivity) {
             
             if ([obj.retCode intValue] == 0) {
@@ -288,7 +282,10 @@
     }
     
     [self.mainTableView finishLoading];
-    [self.refreshFooter endRefreshing];
+    if ([self.dataCount intValue] == self.dataArray.count) {
+        [self.mainTableView.mj_footer endRefreshing];
+    }
+    
 }
 
 - (void) requestFailBack:(id)errorResult
@@ -297,7 +294,6 @@
     [self stopLoading];
     [self showNotData];
     [self.mainTableView finishLoading];
-    [self.refreshFooter endRefreshing];
 
 }
 
@@ -416,11 +412,11 @@
                 [self sendRequestWithObjTypeId:[NSNumber numberWithInt:3] andPage:self.page];
             }
         }else{
-            [self.refreshFooter endRefreshing];
+            [self.mainTableView.mj_footer endRefreshing];
         }
     }else{
     
-        [self.refreshFooter endRefreshing];
+        [self.mainTableView.mj_footer endRefreshing];
     }
 }
 @end

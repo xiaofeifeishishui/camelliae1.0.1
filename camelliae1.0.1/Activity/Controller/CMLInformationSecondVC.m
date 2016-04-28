@@ -22,10 +22,9 @@
 #import "NewsObj.h"
 #import "NSDate+CMLExspand.h"
 #import "UIScrollView+RefreshHeader.h"
-#import "CMLRefreshFooter.h"
 #import "CMLInfomationTVCell.h"
 #import "CMLInformationDetailVC.h"
-
+#import "MJRefresh.h"
 #define ModuleHeight       280
 
 #define PageSize           20
@@ -35,9 +34,6 @@
 @property (nonatomic,strong) NSMutableArray *dataArray;
 
 @property (nonatomic,strong) UITableView *mainTableView;
-
-@property (nonatomic,strong) CMLRefreshFooter *refreshFooter;
-
 
 @property (nonatomic,assign) int page;
 
@@ -100,20 +96,17 @@
         [weakSelf pullRefreshOfHeader];
     }];
     
-    /**上拉加载*/
-    self.refreshFooter = [[CMLRefreshFooter alloc] init];
-    self.refreshFooter.scrollView = self.mainTableView;
-    [self.refreshFooter footer];
-    __block CMLInformationSecondVC *vc = self;
-    self.refreshFooter.beginRefreshingBlock = ^(){
-        [vc.refreshFooter beginRefreshing];
-        [vc pullToLoadingOfFooter];
-        
-    };
+//    /**上拉加载*/
+
+    self.mainTableView.mj_footer = [MJRefreshBackNormalFooter footerWithRefreshingTarget:self refreshingAction:@selector(loadMoreData)];
     
     
 }
 
+- (void) loadMoreData{
+    [self pullToLoadingOfFooter];
+    
+}
 
 - (void) setNetWorkWithType:(NSNumber *) type andPage:(int) page{
     
@@ -155,11 +148,9 @@
             [self.dataArray addObjectsFromArray:obj.retData.dataList];
             self.mainTableView.hidden = NO;
             [self.mainTableView reloadData];
-            [self.refreshFooter endRefreshing];
             [self hiddenNotData];
         }else{
             
-            [self.refreshFooter endRefreshing];
             self.mainTableView.hidden = YES;
             [self showNotData];
         }
@@ -168,19 +159,21 @@
     }else{
         
         [self.mainTableView finishLoading];
-        [self.refreshFooter endRefreshing];
+        
         [self showAlterViewWithText:obj.retMsg];
         self.mainTableView.hidden = YES;
         [self showNotData];
     }
-    [self.refreshFooter endRefreshing];
+    
+    if ([obj.retData.dataCount intValue] == self.dataArray.count) {
+        [self.mainTableView.mj_footer endRefreshing];
+    }
     [self stopLoading];
     
 }
 
 - (void) requestFailBack:(id)errorResult
              withApiName:(NSString *)apiName{
-    
     [self.mainTableView finishLoading];
     self.mainTableView.hidden = YES;
     [self stopLoading];
@@ -258,11 +251,13 @@
             self.page++;
             [self setNetWorkWithType:self.currentInformationType andPage:self.page];
         }else{
-            [self.refreshFooter endRefreshing];
+           
+            [self.mainTableView.mj_footer endRefreshing];
         }
     }else{
         
-        [self.refreshFooter endRefreshing];
+        
+        [self.mainTableView.mj_footer endRefreshing];
     }
 }
 

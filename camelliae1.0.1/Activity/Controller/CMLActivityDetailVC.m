@@ -30,7 +30,8 @@
 #import "UIImage+CMLExspand.h"
 #import "CMLCommentListTVCell.h"
 #import "CommentObj.h"
-#import "CMLRefreshFooter.h"
+//#import "CMLRefreshFooter.h"
+#import "MJRefresh.h"
 
 #define Duration                  0.5f
 #define FunctionViewHeight        83
@@ -110,8 +111,6 @@
 @property (nonatomic,strong) BaseResultObj *commentrootObj;
 
 @property (nonatomic,assign) int page;
-
-@property (nonatomic,strong) CMLRefreshFooter *refreshFooter;
 
 @property (nonatomic,strong) NSMutableArray *dataArray;
 
@@ -432,6 +431,15 @@
             self.commentTableView.tableFooterView = [[UIView alloc] init];
             [self.contentView addSubview:self.commentTableView];
             
+            self.noCommentLabel = [[UILabel alloc] init];
+            self.noCommentLabel.text = @"暂无评论";
+            self.noCommentLabel.textColor = [UIColor CMLCommentTimeGrayColor];
+            self.noCommentLabel.font = KSystemFontSize14;
+            [self.noCommentLabel sizeToFit];
+            self.noCommentLabel.frame = CGRectMake(self.commentTableView.frame.size.width/2.0 - self.noCommentLabel.frame.size.width/2.0, 100, self.noCommentLabel.frame.size.width, self.noCommentLabel.frame.size.height);
+            
+            [self.commentTableView addSubview:self.noCommentLabel];
+            
             UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 40)];
             UILabel *label = [[UILabel alloc] init];
             label.text = @"评论";
@@ -454,15 +462,7 @@
             self.commentTableView.tableHeaderView = view;
             
             /**上拉加载*/
-            self.refreshFooter = [[CMLRefreshFooter alloc] init];
-            self.refreshFooter.scrollView = self.commentTableView;
-            [self.refreshFooter footer];
-            __block CMLActivityDetailVC *vc = self;
-            self.refreshFooter.beginRefreshingBlock = ^(){
-                [vc.refreshFooter beginRefreshing];
-                [vc pullToLoadingOfFooter];
-                
-            };
+            self.commentTableView.mj_footer = [MJRefreshBackNormalFooter footerWithRefreshingTarget:self refreshingAction:@selector(loadMoreData)];
 
             [self.contentView addSubview:self.functionView];
             
@@ -529,10 +529,18 @@
     
         
         self.commentrootObj = [BaseResultObj getBaseObjFrom:responseResult];
-        [self.dataArray removeAllObjects];
         [self.dataArray addObjectsFromArray:self.commentrootObj.retData.dataList];
         [self.commentTableView reloadData];
-        [self.refreshFooter endRefreshing];
+        
+        if ([self.commentrootObj.retData.dataCount intValue] == self.dataArray.count) {
+            [self.commentTableView.mj_footer endRefreshing];
+        }
+        
+        if (self.dataArray.count == 0) {
+            self.noCommentLabel.hidden = NO;
+        }else{
+           self.noCommentLabel.hidden = YES;
+        }
     
     }else if ([self.currentApiName isEqualToString:CommentPost]){
     
@@ -546,12 +554,15 @@
 - (void) requestFailBack:(id)errorResult
              withApiName:(NSString *)apiName{
 
-    [self.refreshFooter endRefreshing];
     [self stopLoading];
     [self showNotData];
 
 }
 
+- (void) loadMoreData{
+    [self pullToLoadingOfFooter];
+    
+}
 
 - (void) makeAppointmentImmediately{
 
@@ -1256,11 +1267,11 @@
             self.page++;
             [self getCommentList:self.page];
         }else{
-            [self.refreshFooter endRefreshing];
+            [self.commentTableView.mj_footer endRefreshing];
         }
     }else{
         
-        [self.refreshFooter endRefreshing];
+        [self.commentTableView.mj_footer endRefreshing];
     }
 
 }

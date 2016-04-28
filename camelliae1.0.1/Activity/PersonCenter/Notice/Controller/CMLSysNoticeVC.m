@@ -20,9 +20,9 @@
 #import "BaseResultObj.h"
 #import "CMLSysNoticeTVCell.h"
 #import "CMLSysNoticeObj.h"
-#import "CMLRefreshFooter.h"
 #import "UIScrollView+RefreshHeader.h"
 #import "CMLSysDetailNoticeVC.h"
+#import "MJRefresh.h"
 
 #define PageSize   20
 
@@ -35,8 +35,6 @@
 @property (nonatomic,assign) int page;
 
 @property (nonatomic,assign) CGFloat currentRowHeight;
-
-@property (nonatomic,strong) CMLRefreshFooter *refreshFooter;
 
 @property (nonatomic,strong) BaseResultObj *obj;
 
@@ -91,21 +89,14 @@
         [weakSelf pullRefreshOfHeader];
     }];
     
-    
-    self.refreshFooter = [[CMLRefreshFooter alloc] init];
-    self.refreshFooter.scrollView = self.mainTableView;
-    [self.refreshFooter footer];
-    
     /**上拉*/
-    __block CMLSysNoticeVC *vc = self;
-    self.refreshFooter.beginRefreshingBlock = ^(){
-    
-        [vc.refreshFooter beginRefreshing];
-        [vc pullToLoadingOfFooter];
-        
-    };
+   self.mainTableView.mj_footer = [MJRefreshBackNormalFooter footerWithRefreshingTarget:self refreshingAction:@selector(loadMoreData)];
 }
 
+- (void) loadMoreData{
+    [self pullToLoadingOfFooter];
+    
+}
 - (void) loadData{
 
      [self startLoading];
@@ -200,16 +191,17 @@
         self.mainTableView.hidden = NO;
         [self.dataArray addObjectsFromArray:self.obj.retData.dataList];
         [self.mainTableView reloadData];
-        [self.refreshFooter endRefreshing];
         
     }else{
     
         [self showNotData];
         [self showAlterViewWithText:self.obj.retMsg];
-        [self.refreshFooter endRefreshing];
+        
     }
     [self.mainTableView finishLoading];
-   [self.refreshFooter endRefreshing];
+    if ([self.obj.retData.dataCount intValue] == self.dataArray.count) {
+        [self.mainTableView.mj_footer endRefreshing];
+    }
 }
 
 - (void) requestFailBack:(id)errorResult
@@ -217,7 +209,7 @@
 
     [self showNotData];
     [self stopLoading];
-    [self.refreshFooter endRefreshing];
+    [self.mainTableView.mj_footer endRefreshing];
     [self.mainTableView finishLoading];
 }
 
@@ -230,9 +222,11 @@
             self.page++;
             
             [self setNetworkWithPage:self.page];
+        }else{
+            [self.mainTableView.mj_footer endRefreshing];
         }
     }else{
-        [self.refreshFooter endRefreshing];
+        [self.mainTableView.mj_footer endRefreshing];
     }
 }
 

@@ -25,7 +25,7 @@
 #import "CMLActivityDetailVC.h"
 #import "CMLServeDetailVC.h"
 #import "UIScrollView+RefreshHeader.h"
-#import "CMLRefreshFooter.h"
+#import "MJRefresh.h"
 
 #define ChooseBtnHeight   44
 #define RowHeight         202
@@ -49,8 +49,6 @@
 @property (nonatomic,assign) BOOL isActivity;
 
 @property (nonatomic,assign) int page;
-
-@property (nonatomic,strong) CMLRefreshFooter *refreshFooter;
 
 @property (nonatomic,strong) NSNumber *dataCount;
 
@@ -129,18 +127,13 @@
         [weakSelf pullRefreshOfHeader];
     }];
     
-    self.refreshFooter = [[CMLRefreshFooter alloc] init];
-    self.refreshFooter.scrollView = self.mainTableView;
-    [self.refreshFooter footer];
     
-    /**上拉*/
-    __block CMLCollerctVC *vc = self;
-    self.refreshFooter.beginRefreshingBlock = ^(){
-        
-        [vc.refreshFooter beginRefreshing];
-        [vc pullToLoadingOfFooter];
-        
-    };
+    self.mainTableView.mj_footer = [MJRefreshBackNormalFooter footerWithRefreshingTarget:self refreshingAction:@selector(loadMoreData)];
+    
+}
+
+- (void) loadMoreData{
+    [self pullToLoadingOfFooter];
     
 }
 
@@ -198,6 +191,7 @@
     [paraDic setObject:skey forKey:@"skey"];
     NSString *hashToken = [NSString getEncryptStringfrom:@[[NSNumber numberWithInt:currentTime],userID,skey]];
     [paraDic setObject:hashToken forKey:@"hashToken"];
+    [paraDic setObject:[NSNumber numberWithInt:page] forKey:@"page"];
     [NetWorkTask postResquestWithApiName:FavList paraDic:paraDic delegate:delegate];
     self.currentApiName = FavList;
     [self hiddenNotData];
@@ -240,9 +234,9 @@
                 withApiName:(NSString *)apiName{
     
     BaseResultObj *obj = [BaseResultObj getBaseObjFrom:responseResult];
-    self.dataCount = obj.retData.dataCount;
+    
     if ([self.currentApiName isEqualToString:FavList]) {
-        
+        self.dataCount = obj.retData.dataCount;
         if (self.isActivity) {
             
             if ([obj.retCode intValue] == 0) {
@@ -296,7 +290,9 @@
     }
     
     [self.mainTableView finishLoading];
-    [self.refreshFooter endRefreshing];
+    if ([self.dataCount intValue] == self.dataArray.count) {
+        [self.mainTableView.mj_footer endRefreshing];
+    }
     
 }
 
@@ -306,7 +302,7 @@
     [self showNotData];
     [self stopLoading];
     [self.mainTableView finishLoading];
-    [self.refreshFooter endRefreshing];
+    [self.mainTableView.mj_footer endRefreshing];
     
 }
 
@@ -454,14 +450,15 @@
                 if (self.isActivity) {
                     [self sendRequestWithObjTypeId:[NSNumber numberWithInt:2]withPage:self.page];
                 }else{
+                    
                     [self sendRequestWithObjTypeId:[NSNumber numberWithInt:3]withPage:self.page];
                 }
         }else{
         
-            [self.refreshFooter endRefreshing];
+            [self.mainTableView.mj_footer endRefreshing];
         }
     }else{
-        [self.refreshFooter endRefreshing];
+        [self.mainTableView.mj_footer endRefreshing];
     }
 }
 @end
