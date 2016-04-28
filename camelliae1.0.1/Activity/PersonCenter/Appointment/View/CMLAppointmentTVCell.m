@@ -12,7 +12,7 @@
 #import "CommonImg.h"
 #import "CommonFont.h"
 #import "CommonNumber.h"
-
+#import "UIColor+SDExspand.h"
 
 #define MainImageHeight      170
 #define MainImageWidth       238
@@ -109,7 +109,7 @@
     }
     
     if ([self.showDelegate intValue] == 2) {
-        self.backgroundColor = [UIColor grayColor];
+        self.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.2];
     }
 
 }

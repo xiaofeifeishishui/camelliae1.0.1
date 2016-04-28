@@ -360,8 +360,9 @@
         }
     }else if ([self.currentApiName isEqualToString:ServeSubscribe]){
     
-        [self showAlterViewWithText:self.obj.retMsg];
-        if ([self.obj.retCode intValue] == 0) {
+        BaseResultObj *resultobj = [BaseResultObj getBaseObjFrom:responseResult];
+        [self showAlterViewWithText:resultobj.retMsg];
+        if ([resultobj.retCode intValue] == 0) {
             self.appointmentBtn.selected = YES;
         }
         [self stopLoading];
@@ -369,7 +370,8 @@
         
     }else if ([self.currentApiName isEqualToString:ActivityFav]){
 
-        if ([self.obj.retCode intValue] == 0) {
+        BaseResultObj *resultobj = [BaseResultObj getBaseObjFrom:responseResult];
+        if ([resultobj.retCode intValue] == 0) {
             
             if (self.collectBtn.selected) {
                 self.collectBtnImge.image = [UIImage imageNamed:KCollectedBtnImg];

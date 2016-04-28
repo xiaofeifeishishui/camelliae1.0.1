@@ -102,7 +102,8 @@
 
 @property (nonatomic,assign) CGFloat currentOffSet;
 
-@property (nonatomic,assign) CGFloat webViewrealHeight;
+@property (nonatomic,assign) CGFloat currentOffSetOfTableView;
+
 
 @property (nonatomic,strong) UITableView *commentTableView;
 
@@ -115,6 +116,8 @@
 @property (nonatomic,strong) NSMutableArray *dataArray;
 
 @property (nonatomic,strong) UILabel *noCommentLabel;
+
+@property (nonatomic,strong) UIView *alterView;
 
 @end
 
@@ -311,6 +314,24 @@
     self.webView.navigationDelegate = self;
     self.webView.backgroundColor = [UIColor whiteColor];
     
+    self.alterView = [[UIView alloc] initWithFrame:CGRectMake(0, self.webView.frame.size.height, self.view.frame.size.width, 40)];
+    UILabel *label = [[UILabel alloc] init];
+    label.text = @"评论";
+    label.font = KSystemFontSize11;
+    [label sizeToFit];
+    label.frame =CGRectMake(36*Proportion,
+                            self.alterView.frame.size.height/2.0 - label.frame.size.height/2.0,
+                            label.frame.size.width,
+                            label.frame.size.height);
+    
+    CMLLine *line = [[CMLLine alloc] init];
+    line.startingPoint = CGPointMake(CGRectGetMaxX(label.frame) + 10 , label.center.y);
+    line.directionOfLine = HorizontalLine;
+    line.lineWidth = 0.3;
+    line.LineColor = [UIColor CMLCommentTimeGrayColor];
+    line.lineLength = self.view.frame.size.width - CGRectGetMaxX(label.frame);
+    [self.alterView addSubview:line];
+    [self.alterView addSubview:label];
     /**主界面和功能条隐藏*/
     self.functionView.hidden = YES;
     self.webView.hidden = YES;
@@ -352,17 +373,6 @@
     // Dispose of any resources that can be recreated.
 }
 
-- (void)webView:(WKWebView *)webView didFinishNavigation:(null_unspecified WKNavigation *)navigation{
-
-
-    __weak CMLActivityDetailVC *vc = self;
-    [self.webView evaluateJavaScript:@"document.body.offsetHeight" completionHandler:^(id _Nullable height, NSError * _Nullable error) {
-        vc.webViewrealHeight = vc.webViewrealHeight + [height floatValue];
-        
-    }];
-
-    
-}
 
 - (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation{
     
@@ -401,7 +411,7 @@
             UIView *headerView = [[UIView alloc] init];
             CGFloat height =[self addSubViewsTo:headerView];
             headerView.frame = CGRectMake(0, -height, self.view.frame.size.width, height);
-            self.webViewrealHeight = -height - self.functionView.frame.size.height;
+            
             [self.webView loadHTMLString:str baseURL:nil];
             self.webBrowserView = self.webView.scrollView.subviews[0];
             [UIView animateWithDuration:1 animations:^{
@@ -409,20 +419,20 @@
             }];
             
             [self.webView.scrollView addSubview:headerView];
-            
+            [self.webView addSubview:self.alterView];
             [self.contentView addSubview:self.webView];
             
             /**comment*/
             self.commentTableView = [[UITableView alloc] initWithFrame:CGRectMake(0,
-                                                                                  CGRectGetMaxY(self.contentView.frame),
-                                                                                  self.view.frame.size.width, 1)
+                                                                                  CGRectGetMaxY(self.contentView.frame)- self.functionView.frame.size.height,
+                                                                                  self.view.frame.size.width, self.contentView.frame.size.height - CGRectGetMaxY(self.navBar.frame) - self.functionView.frame.size.height)
                                                                  style:UITableViewStylePlain];
             self.commentTableView.delegate = self;
             self.commentTableView.dataSource = self;
             self.commentTableView.tableFooterView = [[UIView alloc] init];
             [self.contentView addSubview:self.commentTableView];
             
-            UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 20)];
+            UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 40)];
             UILabel *label = [[UILabel alloc] init];
             label.text = @"评论";
             label.font = KSystemFontSize11;
@@ -442,14 +452,6 @@
             [view addSubview:label];
             
             self.commentTableView.tableHeaderView = view;
-//            self.noCommentLabel = [[UILabel alloc] init];
-//            self.noCommentLabel.textColor = [UIColor CMLCommentTimeGrayColor];
-//            self.noCommentLabel.text = @"暂无评论";
-//            self.noCommentLabel.font = KSystemFontSize13;
-//            [self.noCommentLabel sizeToFit];
-//            self.noCommentLabel.center = CGPointMake(self.contentView.center.x, self.contentView.center.y/4);
-//            [self.commentTableView addSubview:self.noCommentLabel];
-//            self.noCommentLabel.hidden = YES;
             
             /**上拉加载*/
             self.refreshFooter = [[CMLRefreshFooter alloc] init];
@@ -492,16 +494,22 @@
             
         }
     }else if ([self.currentApiName isEqualToString:ActivitySubscribe]){
+   
+        BaseResultObj *resultObj =[BaseResultObj getBaseObjFrom:responseResult];
         
-        if ([self.obj.retCode intValue] == 0) {
+        if ([resultObj.retCode intValue] == 0) {
           
             self.appointmentBtn.selected = YES;
+        }else{
+            self.appointmentBtn.selected = NO;
+            [self showAlterViewWithText:resultObj.retMsg];
         }
         [self stopLoading];
         
     }else if ([self.currentApiName isEqualToString:ActivityFav]){
        
-        if ([self.obj.retCode intValue] == 0) {
+        BaseResultObj *resultObj =[BaseResultObj getBaseObjFrom:responseResult];
+        if ([resultObj.retCode intValue] == 0) {
             
             if (self.collectBtn.selected) {
                 self.collectBtnImge.image = [UIImage imageNamed:KCollectedBtnImg];
@@ -521,22 +529,18 @@
     
         
         self.commentrootObj = [BaseResultObj getBaseObjFrom:responseResult];
+        [self.dataArray removeAllObjects];
         [self.dataArray addObjectsFromArray:self.commentrootObj.retData.dataList];
         [self.commentTableView reloadData];
-        if (self.dataArray.count>0) {
-            self.noCommentLabel.hidden = YES;
-        }else{
-            self.noCommentLabel.hidden = NO;
-            
-        }
+        [self.refreshFooter endRefreshing];
     
     }else if ([self.currentApiName isEqualToString:CommentPost]){
     
         [self.dataArray removeAllObjects];
-       [self getCommentList:1];
+        [self showCommentView];
+
     }
     
-    [self.refreshFooter endRefreshing];
 }
 
 - (void) requestFailBack:(id)errorResult
@@ -552,10 +556,6 @@
 - (void) makeAppointmentImmediately{
 
     if (!self.appointmentBtn.selected) {
-        
-        NSNumber *userLevel = [[DataManager lightData] readUserLevel];
-
-        if ([userLevel intValue] >= [self.obj.retData.memberLevelId intValue]) {
         
             NetWorkDelegate *delegate = [[NetWorkDelegate alloc] init];
             delegate.delegate = self;
@@ -574,10 +574,6 @@
             [NetWorkTask postResquestWithApiName:ActivitySubscribe paraDic:paraDic delegate:delegate];
             self.currentApiName = ActivitySubscribe;
             [self startLoading];
-        }else{
-        
-            [self showAlterViewWithText:@"抱歉,您的会员等级不符合活动要求,无法参与此活动"];
-        }
         
     }else{
     
@@ -679,7 +675,7 @@
     
     UIView *lineView = [[UIView alloc] initWithFrame:CGRectMake(DetailInfoLeftMargin*Proportion,
                                                                 CGRectGetMaxY(numOfBrowseCollectionLabel.frame) + DetailInfoLeftMargin*Proportion ,
-                                                                self.view.frame.size.width - 2*DetailInfoLeftMargin*Proportion,
+                                                                self.view.frame.size.width - 2*DetailInfoSpace*Proportion,
                                                                 0.3)];
     lineView.backgroundColor = [UIColor CMLLineGrayColor];
     [view addSubview:lineView];
@@ -763,7 +759,7 @@
     endView.backgroundColor = [UIColor CMLVIPGrayColor];
     [view addSubview:endView];
     
-    return topImage.frame.size.height + title.frame.size.height + numOfBrowseCollectionLabel.frame.size.height + dateLabel.frame.size.height + addressImage.frame.size.height + DetailTitleTopMargin*Proportion + DetailInfoSpace*Proportion*11 + telephone.frame.size.height;
+    return topImage.frame.size.height + title.frame.size.height + numOfBrowseCollectionLabel.frame.size.height + dateLabel.frame.size.height + addressImage.frame.size.height + DetailTitleTopMargin*Proportion + DetailInfoSpace*Proportion*10 + telephone.frame.size.height + endView.frame.size.height;
     
 
 }
@@ -1070,27 +1066,37 @@
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView{
 
-    if (self.currentOffSet != self.webView.scrollView.contentOffset.y) {
-        self.currentOffSet = self.webView.scrollView.contentOffset.y;
-        
+    self.currentOffSet = self.webView.scrollView.contentOffset.y;
+    
+    if (self.commentTableView.contentOffset.y != 0) {
+      self.currentOffSetOfTableView = self.commentTableView.contentOffset.y;
+    }
+    if ((int)self.currentOffSet > (int)(self.webView.scrollView.contentSize.height - self.webView.frame.size.height)) {
+        self.alterView.frame = CGRectMake(0, self.webView.frame.size.height - (self.currentOffSet - (self.webView.scrollView.contentSize.height - self.webView.frame.size.height)), self.view.frame.size.width, 40);
+    }else{
+        self.alterView.frame = CGRectMake(0, self.webView.frame.size.height, self.view.frame.size.width, 40);
     }
 }
 
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView{
+
+}
 - (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate{
 
-    /**评论的出现及隐藏*/
-    if (self.webViewrealHeight > 0) {
+    if ((int)self.currentOffSet > (int)(self.webView.scrollView.contentSize.height - self.webView.frame.size.height)) {
         
-        if (self.currentOffSet >= self.webViewrealHeight) {
-            [self showCommentView];
-        }
+        [self showCommentView];
+        self.webView.hidden = YES;
     }
     
-    if (self.commentTableView.contentOffset.y < 0) {
+    if ((int)self.currentOffSetOfTableView < 0) {
         [self hiddenCommentView];
+        self.webView.hidden = NO;
+        self.currentOffSetOfTableView = 0;
     }
 
 }
+
 #pragma mark - UITableViewDataSource
 
 
@@ -1153,7 +1159,7 @@
                                                  self.view.frame.size.width,
                                                  self.contentView.frame.size.height - self.functionView.frame.size.height - self.navBar.frame.size.height);
     }];
-    [self.dataArray removeAllObjects];
+    
     [self getCommentList:1];
     
     
@@ -1166,15 +1172,21 @@
     [UIView animateWithDuration:0.2 animations:^{
        
         self.commentTableView.frame = CGRectMake(0,
-                                                 CGRectGetMaxY(self.contentView.frame),
+                                                 CGRectGetMaxY(self.contentView.frame) - self.functionView.frame.size.height,
                                                  self.view.frame.size.width,
                                                  self.contentView.frame.size.height - self.functionView.frame.size.height - self.navBar.frame.size.height);
     }];
+    
+    [self.dataArray removeAllObjects];
+    
     
 }
 
 - (void) getCommentList:(int) page{
 
+    if (page == 1) {
+        [self.dataArray removeAllObjects];
+    }
     
     NetWorkDelegate *delegate = [[NetWorkDelegate alloc] init];
     delegate.delegate = self;

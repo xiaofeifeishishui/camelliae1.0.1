@@ -47,11 +47,11 @@
     [self.contentView addSubview:self.userImage];
     
     self.nickNameLabel = [[UILabel alloc] init];
-    self.nickNameLabel.font = KSystemFontSize12;
+    self.nickNameLabel.font = KSystemFontSize15;
     [self.contentView  addSubview:self.nickNameLabel];
     
     self.commentContentLabel = [[UILabel alloc] init];
-    self.commentContentLabel.font = KSystemFontSize11;
+    self.commentContentLabel.font = KSystemFontSize12;
     self.commentContentLabel.numberOfLines = 0;
     [self.contentView  addSubview:self.commentContentLabel];
     
@@ -75,7 +75,7 @@
     self.nickNameLabel.text = self.nickName;
     [self.nickNameLabel sizeToFit];
     self.nickNameLabel.frame = CGRectMake(NickNameLeftMargin*Proportion + CGRectGetMaxX(self.userImage.frame),
-                                          self.userImage.center.y - self.nickNameLabel.frame.size.height/2.0,
+                                          UserImageTopMargin*Proportion,
                                           self.nickNameLabel.frame.size.width,
                                           self.nickNameLabel.frame.size.height);
     self.timeLabel.text = self.publishTime;
@@ -85,7 +85,7 @@
                                       self.timeLabel.frame.size.width,
                                       self.timeLabel.frame.size.height);
     self.commentContentLabel.text = self.commentContent;
-    CGRect rectOfCommentLabel = [self.commentContent boundingRectWithSize:CGSizeMake([UIScreen mainScreen].bounds.size.width - self.nickNameLabel.frame.origin.x - UserImageLeftMargin*Proportion, 10000) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName:KSystemFontSize11} context:nil];
+    CGRect rectOfCommentLabel = [self.commentContent boundingRectWithSize:CGSizeMake([UIScreen mainScreen].bounds.size.width - self.nickNameLabel.frame.origin.x - UserImageLeftMargin*Proportion, 10000) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName:KSystemFontSize12} context:nil];
     self.commentContentLabel.frame = CGRectMake(self.nickNameLabel.frame.origin.x,
                                                 CGRectGetMaxY(self.nickNameLabel.frame) + UserImageTopMargin*Proportion,
                                                 [UIScreen mainScreen].bounds.size.width - UserImageLeftMargin*Proportion - self.nickNameLabel.frame.origin.x ,

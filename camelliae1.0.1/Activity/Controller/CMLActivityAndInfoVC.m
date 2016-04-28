@@ -486,6 +486,7 @@
         });
         
     }
+    [self.refreshFooter endRefreshing];
     [self stopLoading];
 }
 
@@ -493,6 +494,7 @@
              withApiName:(NSString *)apiName{
     /**无网络状态直接结束*/
     [self.mainTableView finishLoading];
+    [self.refreshFooter endRefreshing];
     [self stopLoading];
     
 
