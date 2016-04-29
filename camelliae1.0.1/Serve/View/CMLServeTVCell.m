@@ -14,7 +14,9 @@
 #import "UIColor+SDExspand.h"
 #import "NetWorkTask.h"
 #import "CommonImg.h"
-
+#import "SDWebImageManager.h"
+#import "UIImageView+WebCache.h"
+#import "SDImageCache.h"
 
 #define BackGroundImageHeight     304
 #define TableViewVellHeight       260
@@ -162,9 +164,23 @@
     rightLineTwo.lineWidth =LineWidth;
     [self.imageCoveView addSubview:rightLineTwo];
     
-    [NetWorkTask setImageView:self.BGImage
-                      WithURL:[NSURL URLWithString:self.imageUrl]
-             placeholderImage:[UIImage imageNamed:KActivityPlaceholderImg]];
+    
+    
+    __weak typeof(self) weakSelf = self;
+    
+    self.BGImage.image = [UIImage imageNamed:KActivityPlaceholderImg];
+    SDWebImageManager *manager = [SDWebImageManager sharedManager];
+    
+        [manager downloadImageWithURL:[NSURL URLWithString:self.imageUrl] options:SDWebImageRetryFailed progress:^(NSInteger receivedSize, NSInteger expectedSize) {
+            
+        } completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+            
+            weakSelf.BGImage.image = image;
+            weakSelf.BGImage.alpha = 0;
+            [UIView animateWithDuration:1 animations:^{
+                weakSelf.BGImage.alpha = 1;
+            }];
+        }];
 
 }
 

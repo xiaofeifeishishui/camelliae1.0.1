@@ -13,6 +13,8 @@
 #import "CMLLine.h"
 #import "UIColor+SDExspand.h"
 #import "CommonFont.h"
+#import "SDWebImageManager.h"
+#import "UIImageView+WebCache.h"
 
 #define CMLPageTVCellHeight   260
 #define CMLBGImageHeight      304
@@ -199,9 +201,21 @@
             break;
     }
     
-    [NetWorkTask setImageView:self.backgroundImg
-                      WithURL:[NSURL URLWithString:self.imgUrl]
-             placeholderImage:[UIImage imageNamed:KActivityPlaceholderImg]];
+    __weak typeof(self) weakSelf = self;
+    
+    self.backgroundImg.image = [UIImage imageNamed:KActivityPlaceholderImg];
+    SDWebImageManager *manager = [SDWebImageManager sharedManager];
+    
+    [manager downloadImageWithURL:[NSURL URLWithString:self.imgUrl] options:SDWebImageRetryFailed progress:^(NSInteger receivedSize, NSInteger expectedSize) {
+        
+    } completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+        
+        weakSelf.backgroundImg.image = image;
+        weakSelf.backgroundImg.alpha = 0;
+        [UIView animateWithDuration:1 animations:^{
+            weakSelf.backgroundImg.alpha = 1;
+        }];
+    }];
 }
 
 - (void)cellOnTableView:(UITableView *)tableView didScrollOnView:(UIView *)view{
