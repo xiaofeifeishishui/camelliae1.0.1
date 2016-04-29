@@ -1114,14 +1114,18 @@
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
 
     if (self.commentrootObj) {
-        CMLCommentListTVCell *cell = (CMLCommentListTVCell *)[self tableView:self.commentTableView cellForRowAtIndexPath:indexPath];
-        CommentObj *obj =  [CommentObj getBaseObjFrom:self.dataArray[indexPath.row]];
-        cell.imageUrl = obj.userHeadImg;
-        cell.nickName = obj.userNickName;
-        cell.commentContent = obj.comment;
-        cell.publishTime = obj.postTimeStr;
-        CGFloat rowHeight = [cell refreshTableViewCell];
-        return rowHeight;
+        if (self.dataArray.count > 0) {
+            CMLCommentListTVCell *cell = (CMLCommentListTVCell *)[self tableView:self.commentTableView cellForRowAtIndexPath:indexPath];
+            CommentObj *obj =  [CommentObj getBaseObjFrom:self.dataArray[indexPath.row]];
+            cell.imageUrl = obj.userHeadImg;
+            cell.nickName = obj.userNickName;
+            cell.commentContent = obj.comment;
+            cell.publishTime = obj.postTimeStr;
+            CGFloat rowHeight = [cell refreshTableViewCell];
+            return rowHeight;
+        }else{
+            return 0;
+        }
     }else{
         return 0;
     }
@@ -1149,7 +1153,7 @@
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
     }
 
-    if (self.dataArray>0) {
+    if (self.dataArray.count>0) {
         CommentObj *obj =  [CommentObj getBaseObjFrom:self.dataArray[indexPath.row]];
         cell.imageUrl = obj.userHeadImg;
         cell.nickName = obj.userNickName;
