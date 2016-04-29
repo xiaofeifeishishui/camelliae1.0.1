@@ -21,6 +21,7 @@
 #import "NSString+CMLExspand.h"
 #import "AppGroup.h"
 #import "CMLSettingDetailVC.h"
+#import "SDImageCache.h"
 
 #define LeftMargin                 36
 #define RightMargin                36
@@ -299,6 +300,9 @@
 #pragma mark - showClearContent
 - (void) showClearContent{
     [self showAlterViewWithText:@"缓存已清除"];
+    [[SDImageCache sharedImageCache] getSize];
+    [[SDImageCache sharedImageCache] clearDisk];
+    
 }
 
 @end
