@@ -31,11 +31,11 @@
 
 
 //后段服务器（测试）
-//#define NetWorkApiDomain @"http://fakeapi.camelliae.com/"
+#define NetWorkApiDomain @"http://fakeapi.camelliae.com/"
 
 
 //后段服务器(上线)
-#define NetWorkApiDomain @"http://mapi.camelliae.com/"
+//#define NetWorkApiDomain @"http://mapi.camelliae.com/"
 
 //启动
 #define AppStarting      @"api/start-up"

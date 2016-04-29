@@ -481,10 +481,8 @@
         });
         
     }
-    if ([baseObj.retData.dataCount intValue] == self.activityArray.count) {
-        [self.mainTableView.mj_footer endRefreshing];
-    }
     
+    [self.mainTableView.mj_footer endRefreshing];
     [self stopLoading];
 }
 

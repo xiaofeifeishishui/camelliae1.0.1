@@ -165,9 +165,7 @@
         [self showNotData];
     }
     
-    if ([obj.retData.dataCount intValue] == self.dataArray.count) {
-        [self.mainTableView.mj_footer endRefreshing];
-    }
+    [self.mainTableView.mj_footer endRefreshing];
     [self stopLoading];
     
 }

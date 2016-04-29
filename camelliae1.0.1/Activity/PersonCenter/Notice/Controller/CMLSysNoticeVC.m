@@ -199,9 +199,7 @@
         
     }
     [self.mainTableView finishLoading];
-    if ([self.obj.retData.dataCount intValue] == self.dataArray.count) {
-        [self.mainTableView.mj_footer endRefreshing];
-    }
+    [self.mainTableView.mj_footer endRefreshing];
 }
 
 - (void) requestFailBack:(id)errorResult

@@ -282,9 +282,7 @@
     }
     
     [self.mainTableView finishLoading];
-    if ([self.dataCount intValue] == self.dataArray.count) {
-        [self.mainTableView.mj_footer endRefreshing];
-    }
+    [self.mainTableView.mj_footer endRefreshing];
     
 }
 

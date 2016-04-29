@@ -154,6 +154,7 @@
         if (obj.retData.dataList.count > 0) {
             
             [self.dataArray addObjectsFromArray:obj.retData.dataList];
+            
             self.mainTableView.hidden = NO;
             [self.mainTableView reloadData];
             
@@ -173,10 +174,8 @@
         self.mainTableView.hidden = YES;
         [self showNotData];
     }
-    if (self.dataArray.count == [self.dataCount intValue]) {
-        [self.mainTableView.mj_footer endRefreshing];
-    }
-
+    
+    [self.mainTableView.mj_footer endRefreshing];
     [self stopLoading];
 
 }

@@ -526,15 +526,13 @@
     
        
     }else if ([self.currentApiName isEqualToString:CommentList]){
-    
         
         self.commentrootObj = [BaseResultObj getBaseObjFrom:responseResult];
+        
         [self.dataArray addObjectsFromArray:self.commentrootObj.retData.dataList];
         [self.commentTableView reloadData];
         
-        if ([self.commentrootObj.retData.dataCount intValue] == self.dataArray.count) {
-            [self.commentTableView.mj_footer endRefreshing];
-        }
+        [self.commentTableView.mj_footer endRefreshing];
         
         if (self.dataArray.count == 0) {
             self.noCommentLabel.hidden = NO;
