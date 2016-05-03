@@ -60,16 +60,26 @@
     self.BGImage.image = [UIImage imageNamed:KActivityPlaceholderImg];
     SDWebImageManager *manager = [SDWebImageManager sharedManager];
     
-    [manager downloadImageWithURL:[NSURL URLWithString:self.imageUrl] options:SDWebImageRetryFailed progress:^(NSInteger receivedSize, NSInteger expectedSize) {
-        
-    } completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
-        
-        weakSelf.BGImage.image = image;
-        weakSelf.BGImage.alpha = 0;
+    UIImage *image = [[SDImageCache sharedImageCache] imageFromDiskCacheForKey:self.imageUrl];
+    if (image) {
+        self.BGImage.image = image;
+        self.BGImage.alpha = 0;
         [UIView animateWithDuration:1 animations:^{
             weakSelf.BGImage.alpha = 1;
         }];
-    }];
+    }else{
+        
+        [manager downloadImageWithURL:[NSURL URLWithString:self.imageUrl] options:SDWebImageRetryFailed progress:^(NSInteger receivedSize, NSInteger expectedSize) {
+            
+        } completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+            
+            weakSelf.BGImage.image = image;
+            weakSelf.BGImage.alpha = 0;
+            [UIView animateWithDuration:1 animations:^{
+                weakSelf.BGImage.alpha = 1;
+            }];
+        }];
+    }
     
 }
 
