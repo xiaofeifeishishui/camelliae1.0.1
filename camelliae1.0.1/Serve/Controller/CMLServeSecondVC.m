@@ -176,7 +176,12 @@
     }
     
     [self.mainTableView.mj_footer endRefreshing];
-    [self stopLoading];
+    [self performSelector:@selector(stopLoadingOfMainView) withObject:nil afterDelay:1.5];
+
+}
+
+- (void) stopLoadingOfMainView {
+   [self stopLoading];
 
 }
 

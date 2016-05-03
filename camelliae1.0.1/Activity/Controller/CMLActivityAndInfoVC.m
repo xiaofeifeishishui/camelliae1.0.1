@@ -111,7 +111,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    self.view.backgroundColor = [UIColor whiteColor];
+    self.view.backgroundColor = [UIColor grayColor];
     self.page = 1;
 
      [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
@@ -483,12 +483,19 @@
     }
     
     [self.mainTableView.mj_footer endRefreshing];
+    
+    [self performSelector:@selector(stopLoadingOfMainView) withObject:nil afterDelay:1.5];
+}
+
+- (void) stopLoadingOfMainView {
     [self stopLoading];
+
 }
 
 - (void) requestFailBack:(id)errorResult
              withApiName:(NSString *)apiName{
     /**无网络状态直接结束*/
+    [self.mainTableView.mj_footer endRefreshingWithNoMoreData];
     [self.mainTableView finishLoading];
     [self stopLoading];
     

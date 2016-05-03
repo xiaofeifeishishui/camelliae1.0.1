@@ -65,9 +65,14 @@
     self.activityView.center = self.view.center;
     self.activityView.activityIndicatorViewStyle = UIActivityIndicatorViewStyleGray;
     [self.view addSubview:self.backgroundImg];
+    self.backgroundImg.alpha = 0;
+    [UIView animateWithDuration:1 animations:^{
+        self.backgroundImg.alpha = 1;
+    }];
     [self.view addSubview:self.activityView];
     
     [self APPStartupNetWork];
+   
     
 }
 

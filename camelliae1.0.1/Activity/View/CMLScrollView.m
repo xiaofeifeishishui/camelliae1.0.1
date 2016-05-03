@@ -9,6 +9,7 @@
 #import "CMLScrollView.h"
 #import "NetWorkTask.h"
 #import "CommonImg.h"
+#import "SDWebImageManager.h"
 
 @interface CMLScrollView ()<UIScrollViewDelegate,UIPageViewControllerDelegate>
 @property (strong, nonatomic) UIScrollView *mainScrollView;
@@ -66,12 +67,34 @@
         
         if (i == 0) {
             if (_hasUrlImg) {
-                [NetWorkTask setImageView:imageView WithURL:[NSURL URLWithString:_urlArray[_imgCount-1]] placeholderImage:[UIImage imageNamed:KActivityPlaceholderImg]];
+                
+                
+                
+                SDWebImageManager *manager = [SDWebImageManager sharedManager];
+                
+                imageView.image = [UIImage imageNamed:KActivityPlaceholderImg];
+                
+                [manager downloadImageWithURL:[NSURL URLWithString:_urlArray[_imgCount-1]] options:SDWebImageRetryFailed progress:^(NSInteger receivedSize, NSInteger expectedSize) {
+                    
+                } completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+                    
+                    imageView.image = image;
+                    imageView.alpha = 0;
+                    [UIView animateWithDuration:1 animations:^{
+                        imageView.alpha = 1;
+                    }];
+                }];
+                
                 label.text = _typeNameArray[_imgCount-1];
                 [label sizeToFit];
                 label.frame = CGRectMake(imageView.frame.size.width - label.frame.size.width - 5, imageView.frame.size.height - label.frame.size.height - 10, label.frame.size.width, label.frame.size.height);
                 label.backgroundColor = [UIColor blueColor];
                 [imageView addSubview:label];
+                label.alpha = 0;
+                [UIView animateWithDuration:1 animations:^{
+                    label.alpha = 1;
+                }];
+                
             }else{
                 imageView.image = [UIImage imageNamed:_imgArray[_imgCount-1]];
  
@@ -79,24 +102,61 @@
             imageView.tag = _imgCount-1;
         }else if (i == _imgCount+1){
             if (_hasUrlImg) {
-                [NetWorkTask setImageView:imageView WithURL:[NSURL URLWithString:_urlArray[0]] placeholderImage:[UIImage imageNamed:KActivityPlaceholderImg]];
+                
+                imageView.image = [UIImage imageNamed:KActivityPlaceholderImg];
+                SDWebImageManager *manager = [SDWebImageManager sharedManager];
+                
+                [manager downloadImageWithURL:[NSURL URLWithString:_urlArray[0]] options:SDWebImageRetryFailed progress:^(NSInteger receivedSize, NSInteger expectedSize) {
+                    
+                } completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+                    
+                    imageView.image = image;
+                    imageView.alpha = 0;
+                    [UIView animateWithDuration:1 animations:^{
+                        imageView.alpha = 1;
+                    }];
+                }];
+                
                 label.text = _typeNameArray[0];
                 [label sizeToFit];
                 label.frame = CGRectMake(imageView.frame.size.width - label.frame.size.width - 5, imageView.frame.size.height - label.frame.size.height - 10, label.frame.size.width, label.frame.size.height);
                 label.backgroundColor = [UIColor blueColor];
                 [imageView addSubview:label];
+                label.alpha = 0;
+                [UIView animateWithDuration:1 animations:^{
+                    label.alpha = 1;
+                }];
             }else{
                 imageView.image = [UIImage imageNamed:_imgArray[0]];
             }
             imageView.tag = 0;
         }else{
             if (_hasUrlImg) {
-                [NetWorkTask setImageView:imageView WithURL:[NSURL URLWithString:_urlArray[i-1]] placeholderImage:[UIImage imageNamed:KActivityPlaceholderImg]];
+
+                
+                imageView.image = [UIImage imageNamed:KActivityPlaceholderImg];
+                SDWebImageManager *manager = [SDWebImageManager sharedManager];
+                
+                [manager downloadImageWithURL:[NSURL URLWithString:_urlArray[i-1]] options:SDWebImageRetryFailed progress:^(NSInteger receivedSize, NSInteger expectedSize) {
+                    
+                } completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+                    
+                    imageView.image = image;
+                    imageView.alpha = 0;
+                    [UIView animateWithDuration:1 animations:^{
+                        imageView.alpha = 1;
+                    }];
+                }];
+                
                 label.text = _typeNameArray[i-1];
                 [label sizeToFit];
                 label.frame = CGRectMake(imageView.frame.size.width - label.frame.size.width - 5, imageView.frame.size.height - label.frame.size.height - 10, label.frame.size.width, label.frame.size.height);
                 label.backgroundColor = [UIColor blueColor];
                 [imageView addSubview:label];
+                label.alpha = 0;
+                [UIView animateWithDuration:1 animations:^{
+                    label.alpha = 1;
+                }];
             }else{
                 imageView.image = [UIImage imageNamed:_imgArray[i-1]];
             }

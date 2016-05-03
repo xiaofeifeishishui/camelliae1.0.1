@@ -14,6 +14,8 @@
 #import "UIColor+SDExspand.h"
 #import "CMLCustomAlterView.h"
 #import "CMLShareModel.h"
+#import "PushTransition.h"
+#import "PopTransition.h"
 
 #define NoDataImageHeightAndWidth  147
 #define StateBarHeight             20
@@ -27,7 +29,7 @@
 #define AlterViewTextBottomMargin        30
 
 
-@interface CMLBaseVC ()<CMLALterViewDelegate>
+@interface CMLBaseVC ()<CMLALterViewDelegate,UINavigationControllerDelegate>
 
 /**移动方向*/
 @property (nonatomic,assign) MovementDirection direction;
@@ -47,10 +49,16 @@
 
 @implementation CMLBaseVC
 
+- (void)viewDidAppear:(BOOL)animated{
+
+    [super viewDidAppear:animated];
+    self.navigationController.delegate = self;
+
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
-
-    
+        
     /**底层图*/
     self.contentView = [[UIView alloc] initWithFrame:CGRectMake(0,
                                                                 StateBarHeight,
@@ -282,5 +290,18 @@
 
 }
 
+#pragma mark -UINavigationControllerDelegate
+- (id<UIViewControllerAnimatedTransitioning>)navigationController:(UINavigationController *)navigationController animationControllerForOperation:(UINavigationControllerOperation)operation fromViewController:(UIViewController *)fromVC toViewController:(UIViewController *)toVC
+{
+    if (operation == UINavigationControllerOperationPush) {
+        //返回我们自定义的效果
+        return [[PushTransition alloc]init];
+    }
+    else if (operation == UINavigationControllerOperationPop){
+        return [[PopTransition alloc]init];
+    }
+    //返回nil则使用默认的动画效果
+    return nil;
+}
 
 @end

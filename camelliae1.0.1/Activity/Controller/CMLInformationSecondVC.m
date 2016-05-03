@@ -166,12 +166,19 @@
     }
     
     [self.mainTableView.mj_footer endRefreshing];
-    [self stopLoading];
+    [self performSelector:@selector(stopLoadingOfMainView) withObject:nil afterDelay:1.5];
     
+}
+
+- (void) stopLoadingOfMainView{
+   [self stopLoading];
+
 }
 
 - (void) requestFailBack:(id)errorResult
              withApiName:(NSString *)apiName{
+    
+    [self.mainTableView.mj_footer endRefreshing];
     [self.mainTableView finishLoading];
     self.mainTableView.hidden = YES;
     [self stopLoading];

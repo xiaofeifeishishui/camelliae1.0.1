@@ -30,7 +30,6 @@
 #import "UIImage+CMLExspand.h"
 #import "CMLCommentListTVCell.h"
 #import "CommentObj.h"
-//#import "CMLRefreshFooter.h"
 #import "MJRefresh.h"
 
 #define Duration                  0.5f
@@ -54,9 +53,7 @@
 
 #define ShareMainViewHeight              195
 #define CancelShareBtnHeight             60
-#define FriendsShareLeftMargin           43
 #define ShareBtnTopMargin                26
-#define ShareBtnSpace                    62
 #define ShareBtnWidthAndHeight           58
 #define ShareTypeNameTopMargin           16
 
@@ -372,7 +369,6 @@
     // Dispose of any resources that can be recreated.
 }
 
-
 - (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation{
     
     [self stopLoading];
@@ -418,7 +414,6 @@
             }];
             
             [self.webView.scrollView addSubview:headerView];
-            [self.webView addSubview:self.alterView];
             [self.contentView addSubview:self.webView];
             
             /**comment*/
@@ -552,6 +547,7 @@
 - (void) requestFailBack:(id)errorResult
              withApiName:(NSString *)apiName{
 
+    [self.commentTableView.mj_footer endRefreshingWithNoMoreData];
     [self stopLoading];
     [self showNotData];
 
@@ -822,7 +818,9 @@
     line.LineColor = [UIColor CMLLineGrayColor];
     [self.shareMainBgView addSubview:line];
     
-    UIButton *converseBtn = [[UIButton alloc] initWithFrame:CGRectMake(FriendsShareLeftMargin*Proportion,
+    CGFloat buttonSpace = (self.view.frame.size.width - ShareBtnWidthAndHeight*Proportion*5)/6;
+    
+    UIButton *converseBtn = [[UIButton alloc] initWithFrame:CGRectMake(buttonSpace,
                                                                        ShareBtnTopMargin*Proportion,
                                                                        ShareBtnWidthAndHeight*Proportion,
                                                                        ShareBtnWidthAndHeight*Proportion)];
@@ -841,7 +839,7 @@
                                    converLabel.frame.size.height);
     [self.shareMainBgView addSubview:converLabel];
     
-    UIButton *friendsBtn = [[UIButton alloc] initWithFrame:CGRectMake(CGRectGetMaxX(converseBtn.frame) + ShareBtnSpace*Proportion,
+    UIButton *friendsBtn = [[UIButton alloc] initWithFrame:CGRectMake(CGRectGetMaxX(converseBtn.frame) + buttonSpace,
                                                                       ShareBtnTopMargin*Proportion ,
                                                                       ShareBtnWidthAndHeight*Proportion,
                                                                       ShareBtnWidthAndHeight*Proportion)];
@@ -860,7 +858,7 @@
                                             circleOfFriendsLabel.frame.size.height);
     [self.shareMainBgView addSubview:circleOfFriendsLabel];
     
-    UIButton *weiboBtn = [[UIButton alloc] initWithFrame:CGRectMake(CGRectGetMaxX(friendsBtn.frame) + ShareBtnSpace*Proportion,
+    UIButton *weiboBtn = [[UIButton alloc] initWithFrame:CGRectMake(CGRectGetMaxX(friendsBtn.frame) + buttonSpace,
                                                                    ShareBtnTopMargin*Proportion,
                                                                    ShareBtnWidthAndHeight*Proportion,
                                                                     ShareBtnWidthAndHeight*Proportion)];
@@ -878,6 +876,42 @@
                                             weiboLabel.frame.size.height);
     [self.shareMainBgView addSubview:weiboLabel];
     
+    UIButton *EmailBtn = [[UIButton alloc] initWithFrame:CGRectMake(CGRectGetMaxX(weiboBtn.frame) + buttonSpace,
+                                                                    ShareBtnTopMargin*Proportion,
+                                                                    ShareBtnWidthAndHeight*Proportion,
+                                                                    ShareBtnWidthAndHeight*Proportion)];
+    [EmailBtn setBackgroundImage:[UIImage imageNamed:KShareToEmailImg] forState:UIControlStateNormal];
+    [EmailBtn addTarget:self action:@selector(shareToEmail) forControlEvents:UIControlEventTouchUpInside];
+    [self.shareMainBgView addSubview:EmailBtn];
+    UILabel *EmailLabel = [[UILabel alloc]init];
+    EmailLabel.font = KSystemFontSize9;
+    EmailLabel.text = @"邮件";
+    EmailLabel.textColor = [UIColor CMLTabBarItemGrayColor];
+    [EmailLabel sizeToFit];
+    EmailLabel.frame = CGRectMake(EmailBtn.center.x - EmailLabel.frame.size.width/2.0,
+                                  CGRectGetMaxY(weiboBtn.frame) + ShareTypeNameTopMargin*Proportion,
+                                  EmailLabel.frame.size.width,
+                                  EmailLabel.frame.size.height);
+    [self.shareMainBgView addSubview:EmailLabel];
+    
+    
+    UIButton *DouBanBtn = [[UIButton alloc] initWithFrame:CGRectMake(CGRectGetMaxX(EmailBtn.frame) + buttonSpace,
+                                                                    ShareBtnTopMargin*Proportion,
+                                                                    ShareBtnWidthAndHeight*Proportion,
+                                                                    ShareBtnWidthAndHeight*Proportion)];
+    [DouBanBtn setBackgroundImage:[UIImage imageNamed:KShareToDouBImg] forState:UIControlStateNormal];
+    [DouBanBtn addTarget:self action:@selector(shareToDouBan) forControlEvents:UIControlEventTouchUpInside];
+    [self.shareMainBgView addSubview:DouBanBtn];
+    UILabel *DouBanLabel = [[UILabel alloc]init];
+    DouBanLabel.font = KSystemFontSize9;
+    DouBanLabel.text = @"豆瓣";
+    DouBanLabel.textColor = [UIColor CMLTabBarItemGrayColor];
+    [DouBanLabel sizeToFit];
+    DouBanLabel.frame = CGRectMake(DouBanBtn.center.x - DouBanLabel.frame.size.width/2.0,
+                                  CGRectGetMaxY(EmailBtn.frame) + ShareTypeNameTopMargin*Proportion,
+                                  DouBanLabel.frame.size.width,
+                                  DouBanLabel.frame.size.height);
+    [self.shareMainBgView addSubview:DouBanLabel];
     
     
     [UIView animateWithDuration:0.2 animations:^{
@@ -968,6 +1002,36 @@
 - (void) shareToWeibo {
 
     [[UMSocialDataService defaultDataService]  postSNSWithTypes:@[UMShareToSina] content:[NSString stringWithFormat:@"%@,%@",self.obj.retData.title,self.obj.retData.shareLink] image:self.shareToSinaImage location:nil urlResource:nil presentedController:self completion:^(UMSocialResponseEntity *shareResponse){
+        if (shareResponse.responseCode == UMSResponseCodeSuccess) {
+            UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"提示信息" message:@"分享成功" delegate:nil cancelButtonTitle:@"好" otherButtonTitles:nil];
+            [alertView show];
+            [self sendShareAction];
+        } else if(shareResponse.responseCode != UMSResponseCodeCancel) {
+            UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"提示信息" message:@"分享失败" delegate:nil cancelButtonTitle:@"好" otherButtonTitles:nil];
+            [alertView show];
+        }
+    }];
+
+}
+
+- (void) shareToEmail{
+
+    [[UMSocialDataService defaultDataService]  postSNSWithTypes:@[UMShareToEmail] content:[NSString stringWithFormat:@"%@,%@",self.obj.retData.title,self.obj.retData.shareLink] image:self.shareToSinaImage location:nil urlResource:nil presentedController:self completion:^(UMSocialResponseEntity *shareResponse){
+        if (shareResponse.responseCode == UMSResponseCodeSuccess) {
+            UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"提示信息" message:@"分享成功" delegate:nil cancelButtonTitle:@"好" otherButtonTitles:nil];
+            [alertView show];
+            [self sendShareAction];
+        } else if(shareResponse.responseCode != UMSResponseCodeCancel) {
+            UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"提示信息" message:@"分享失败" delegate:nil cancelButtonTitle:@"好" otherButtonTitles:nil];
+            [alertView show];
+        }
+    }];
+
+}
+
+- (void) shareToDouBan{
+
+    [[UMSocialDataService defaultDataService]  postSNSWithTypes:@[UMShareToDouban] content:[NSString stringWithFormat:@"%@,%@",self.obj.retData.title,self.obj.retData.shareLink] image:self.shareToSinaImage location:nil urlResource:nil presentedController:self completion:^(UMSocialResponseEntity *shareResponse){
         if (shareResponse.responseCode == UMSResponseCodeSuccess) {
             UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"提示信息" message:@"分享成功" delegate:nil cancelButtonTitle:@"好" otherButtonTitles:nil];
             [alertView show];
@@ -1075,6 +1139,7 @@
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView{
 
+
     self.currentOffSet = self.webView.scrollView.contentOffset.y;
     
     if (self.commentTableView.contentOffset.y != 0) {
@@ -1089,6 +1154,10 @@
 
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView{
 
+    if ((int)self.currentOffSet == (int)(self.webView.scrollView.contentSize.height - self.webView.frame.size.height)) {
+        [self.webView addSubview:self.alterView];
+    }
+    
 }
 - (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate{
 
@@ -1176,8 +1245,6 @@
     [self getCommentList:1];
     
     
-    
-    
 }
 
 - (void) hiddenCommentView{
@@ -1197,6 +1264,7 @@
 
 - (void) getCommentList:(int) page{
 
+    self.page = page;
     if (page == 1) {
         [self.dataArray removeAllObjects];
     }

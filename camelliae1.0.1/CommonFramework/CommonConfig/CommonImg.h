@@ -94,6 +94,8 @@
 #define KShareToweiboImg             @"weibo.png"
 #define KWhiteShareImg               @"whiteShare.png"
 #define KBlackShareImg               @"share.png"
+#define KShareToDouBImg              @"doub.png"
+#define KShareToEmailImg             @"Email.png"
 
 #define KOlympicImg                  @"Olympic.png"
 #define KGaNaImg                     @"gana.jpg"
