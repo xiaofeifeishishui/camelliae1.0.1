@@ -39,9 +39,19 @@
 
 @property (nonatomic,strong) NSNumber *dataCount;
 
+@property (nonatomic,strong) NSMutableArray *cellShowAnimationArray;
+
 @end
 
 @implementation CMLInformationSecondVC
+
+- (NSMutableArray *)cellShowAnimationArray{
+    
+    if (!_cellShowAnimationArray) {
+        _cellShowAnimationArray = [NSMutableArray array];
+    }
+    return _cellShowAnimationArray;
+}
 
 - (NSMutableArray *)dataArray{
     
@@ -96,7 +106,7 @@
         [weakSelf pullRefreshOfHeader];
     }];
     
-//    /**上拉加载*/
+   /**上拉加载*/
 
     self.mainTableView.mj_footer = [MJRefreshBackNormalFooter footerWithRefreshingTarget:self refreshingAction:@selector(loadMoreData)];
     
@@ -210,18 +220,57 @@
     if (!cell) {
         cell = [[CMLInfomationTVCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:identifier];
     }
-    for (int i = 0; i < cell.contentView.subviews.count; i++) {
-        UIView *view = [cell viewWithTag:i];
-        [view removeFromSuperview];
-    }
-    if (self.dataArray.count > 0) {
-        /**get model*/
+    
+    return cell;
+    
+}
+
+- (void)tableView:(UITableView *)tableView willDisplayCell:(CMLInfomationTVCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath{
+    
+    if (self.dataArray.count >0) {
         NewsObj *newsModel =  [NewsObj getBaseObjFrom:self.dataArray[indexPath.row]];
+        
+        BOOL isShowAnimation = NO;
+        
+        for (NSIndexPath *existIndexPath in self.cellShowAnimationArray) {
+            if (existIndexPath.row == indexPath.row) {
+                isShowAnimation = YES;
+            }
+        }
+        if (!isShowAnimation) {
+            
+            /**动画只做一次*/
+            [self.cellShowAnimationArray addObject:indexPath];
+            
+            CATransform3D rotation;//3D旋转
+            
+            rotation = CATransform3DMakeTranslation(0 ,50 ,20);
+            //逆时针旋转
+            
+            rotation = CATransform3DScale(rotation, 0.9, 0.9, 1);
+            
+            rotation.m34 = 1.0/ -600;
+            
+            cell.layer.shadowColor = [[UIColor blackColor]CGColor];
+            cell.layer.shadowOffset = CGSizeMake(10, 10);
+            cell.alpha = 0;
+            
+            cell.layer.transform = rotation;
+            
+            [UIView beginAnimations:@"rotation" context:NULL];
+            //旋转时间
+            [UIView setAnimationDuration:0.6];
+            cell.layer.transform = CATransform3DIdentity;
+            cell.alpha = 1;
+            cell.layer.shadowOffset = CGSizeMake(0, 0);
+            [UIView commitAnimations];
+        }
+        
         cell.imageUrl = newsModel.coverPic;
+        cell.imageID = [NSString stringWithFormat:@"%@%@",newsModel.typeId,newsModel.newsID];
         [cell refreshTableViewCell];
         
     }
-    return cell;
     
 }
 

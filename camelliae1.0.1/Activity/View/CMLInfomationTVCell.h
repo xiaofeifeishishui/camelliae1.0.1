@@ -12,6 +12,8 @@
 
 @property (nonatomic,copy) NSString *imageUrl;
 
+@property (nonatomic,copy) NSString *imageID;
+
 - (void) refreshTableViewCell;
 
 - (void)cellOnTableView:(UITableView *)tableView didScrollOnView:(UIView *)view;

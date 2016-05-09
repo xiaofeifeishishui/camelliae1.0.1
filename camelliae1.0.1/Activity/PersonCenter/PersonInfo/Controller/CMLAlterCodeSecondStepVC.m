@@ -179,6 +179,8 @@
     }else if ([obj.retCode intValue] ==100208){
         NSLog(@"您今日验证码已超限,请联系客服!");
         [self showAlterViewWithText:obj.retMsg];
+    }else{
+        [self showAlterViewWithText:obj.retMsg];
     }
     
     [self stopLoading];

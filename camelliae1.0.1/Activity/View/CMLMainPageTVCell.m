@@ -202,31 +202,11 @@
     }
     
     
-    __weak typeof(self) weakSelf = self;
+    [NetWorkTask setImageView:self.backgroundImg
+                      WithURL:self.imgUrl
+             placeholderImage:[UIImage imageNamed:KActivityPlaceholderImg]
+                    alterImageID:self.imageID];
     
-    self.backgroundImg.image = [UIImage imageNamed:KActivityPlaceholderImg];
-    SDWebImageManager *manager = [SDWebImageManager sharedManager];
-    
-    UIImage *image = [[SDImageCache sharedImageCache] imageFromDiskCacheForKey:self.imgUrl];
-    if (image) {
-        self.backgroundImg.image = image;
-        self.backgroundImg.alpha = 0;
-        [UIView animateWithDuration:1 animations:^{
-            weakSelf.backgroundImg.alpha = 1;
-        }];
-    }else{
-    
-        [manager downloadImageWithURL:[NSURL URLWithString:self.imgUrl] options:SDWebImageRetryFailed progress:^(NSInteger receivedSize, NSInteger expectedSize) {
-            
-        } completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
-            
-            weakSelf.backgroundImg.image = image;
-            weakSelf.backgroundImg.alpha = 0;
-            [UIView animateWithDuration:1 animations:^{
-                weakSelf.backgroundImg.alpha = 1;
-            }];
-        }];
-    }
 }
 
 - (void)cellOnTableView:(UITableView *)tableView didScrollOnView:(UIView *)view{

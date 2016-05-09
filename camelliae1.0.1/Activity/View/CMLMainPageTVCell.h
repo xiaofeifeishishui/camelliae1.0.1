@@ -22,6 +22,8 @@
 
 @property (nonatomic,copy) NSString *shortTitle;
 
+@property (nonatomic,copy) NSString *imageID;
+
 - (void) reloadTableViewCell;
 
 - (void)cellOnTableView:(UITableView *)tableView didScrollOnView:(UIView *)view;

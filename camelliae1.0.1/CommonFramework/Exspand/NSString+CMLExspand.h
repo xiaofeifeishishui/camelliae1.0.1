@@ -20,4 +20,5 @@
 
 + (NSString *) getCityNameWithCityID:(NSNumber *) cityID;
 
++ (NSString *)getImagePlistPath;
 @end

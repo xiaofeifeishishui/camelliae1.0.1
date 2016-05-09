@@ -140,6 +140,7 @@
     [self loadViews];
     [self setNetWork];
     
+    
 }
 
 - (void) loadViews{
@@ -326,6 +327,8 @@
             
             NSData *data =[[NSData alloc] initWithBase64EncodedString:self.obj.retData.content options:0];
             NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+            
+            
             [self.webView loadHTMLString:str baseURL:nil];
             self.webBrowserView = self.webView.scrollView.subviews[0];
             /**加表头*/

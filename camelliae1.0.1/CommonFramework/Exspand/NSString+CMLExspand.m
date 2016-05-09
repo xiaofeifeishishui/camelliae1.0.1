@@ -174,4 +174,14 @@
 
     return cityNAme;
 }
+
+/**获得image*/
++ (NSString *)getImagePlistPath{
+    
+    NSString *docPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
+    
+    NSString *realPath = [docPath stringByAppendingPathComponent:ImagePlistName];
+    
+    return realPath;
+}
 @end

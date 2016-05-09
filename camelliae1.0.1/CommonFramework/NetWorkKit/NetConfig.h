@@ -29,6 +29,9 @@
 //UM
 #define UMAppKey            @"570d27d2e0f55a56eb0007ac"
 
+//图片plist
+#define ImagePlistName      @"imageAltertime.plist"
+
 
 //后段服务器（测试）
 //#define NetWorkApiDomain @"http://fakeapi.camelliae.com/"

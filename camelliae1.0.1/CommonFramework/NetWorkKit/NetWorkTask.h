@@ -20,7 +20,15 @@
 + (BOOL) postResquestWithApiName:(NSString *)apiName
                          paraDic:(NSDictionary *)paraDic
                         delegate:(NetWorkDelegate *)netWorkDelegate;
-/**接收图片*/
-+ (void) setImageView:(UIImageView *) imageView WithURL:(NSURL *)url
-     placeholderImage:(UIImage *) image;
+
+/**图片处理*/
++ (void) setImageView:(UIImageView *) imageView
+              WithURL:(NSString *)url
+     placeholderImage:(UIImage *) image
+         alterImageID:(NSString *) imageID;
+
+
++ (void)setImageView:(UIImageView *)imageView
+             WithURL:(NSURL *)url
+    placeholderImage:(UIImage *)placeholder;
 @end

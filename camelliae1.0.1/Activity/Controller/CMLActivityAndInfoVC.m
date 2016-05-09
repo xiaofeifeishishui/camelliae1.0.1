@@ -42,6 +42,7 @@
 #import "CMLServiceModuleBtn.h"
 #import "CMLInformationSecondVC.h"
 #import "MJRefresh.h"
+#import "SDWebImageManager.h"
 
 #define CMLExerciseTopViewHeight   88
 #define TabBarViewHeight           98
@@ -89,6 +90,8 @@
 
 @property (nonatomic,strong) UILabel *noActivityLabel;
 
+@property (nonatomic,strong) NSMutableArray *cellShowAnimationArray;
+
 @end
 
 @implementation CMLActivityAndInfoVC
@@ -108,6 +111,15 @@
     }
     return _activityArray;
 }
+
+- (NSMutableArray *)cellShowAnimationArray{
+
+    if (!_cellShowAnimationArray) {
+        _cellShowAnimationArray = [NSMutableArray array];
+    }
+    return _cellShowAnimationArray;
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
@@ -374,20 +386,59 @@
         cell =[[CMLMainPageTVCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:identifier];
 
     }
-    for (int i = 0; i < cell.contentView.subviews.count; i++) {
-        UIView *view = [cell viewWithTag:i];
-        [view removeFromSuperview];
-    }
+    
+    return cell;
+}
+
+- (void)tableView:(UITableView *)tableView willDisplayCell:(CMLMainPageTVCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath{
+
     if (self.activityArray.count >0) {
-         
-            ActivityObj *obj = self.activityArray[indexPath.row];
+      ActivityObj *obj = self.activityArray[indexPath.row];
+    
+        BOOL isShowAnimation = NO;
+
+        for (NSIndexPath *existIndexPath in self.cellShowAnimationArray) {
+            if (existIndexPath.row == indexPath.row) {
+                isShowAnimation = YES;
+            }
+        }
+        if (!isShowAnimation) {
+            
+            /**动画只做一次*/
+            [self.cellShowAnimationArray addObject:indexPath];
+            
+            CATransform3D rotation;//3D旋转
+            
+            rotation = CATransform3DMakeTranslation(0 ,50 ,20);
+            //逆时针旋转
+            
+            rotation = CATransform3DScale(rotation, 0.9, 0.9, 1);
+            
+            rotation.m34 = 1.0/ -600;
+            
+            cell.layer.shadowColor = [[UIColor blackColor]CGColor];
+            cell.layer.shadowOffset = CGSizeMake(10, 10);
+            cell.alpha = 0;
+            
+            cell.layer.transform = rotation;
+            
+            [UIView beginAnimations:@"rotation" context:NULL];
+            //旋转时间
+            [UIView setAnimationDuration:0.6];
+            cell.layer.transform = CATransform3DIdentity;
+            cell.alpha = 1;
+            cell.layer.shadowOffset = CGSizeMake(0, 0);
+            [UIView commitAnimations];
+        }
+        
             cell.imgUrl = obj.coverPic;
             cell.memberLevel = [obj.memberLevelId integerValue];
             cell.shortTitle  =  obj.shortTitle;
+            cell.imageID = [NSString stringWithFormat:@"%@%@",obj.typeId,obj.activityID];
             [cell reloadTableViewCell];
+        
     }
-
-    return cell;
+    
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{

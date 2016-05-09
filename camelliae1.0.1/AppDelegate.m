@@ -15,6 +15,7 @@
 #import "UMSocial.h"
 #import "UMSocialWechatHandler.h"
 #import "UMSocialSinaSSOHandler.h"
+#import "NSString+CMLExspand.h"
 @interface AppDelegate ()<WXApiDelegate>
 
 @end
@@ -36,6 +37,17 @@
                                          RedirectURL:@"http://sns.whalecloud.com/sina2/callback"];
     
      [UMSocialConfig hiddenNotInstallPlatforms:@[UMShareToWechatTimeline,UMShareToWechatSession]];
+    
+    /**图片修改时间存储位置*/
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSLog(@"%@",[NSString getImagePlistPath]);
+    if (![fileManager fileExistsAtPath:[NSString getImagePlistPath]]) {
+        [[NSFileManager defaultManager] createFileAtPath:[NSString getImagePlistPath] contents:nil attributes:nil];
+            NSMutableDictionary *dic = [NSMutableDictionary dictionary];
+            [dic setObject:@"values" forKey:@"keys"];
+            [dic writeToFile:[NSString getImagePlistPath] atomically:YES];
+    }
+    
     
     return YES;
 }

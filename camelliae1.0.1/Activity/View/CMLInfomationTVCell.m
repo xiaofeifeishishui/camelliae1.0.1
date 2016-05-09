@@ -55,31 +55,10 @@
     [self.contentView addSubview:self.BGImage];
        
     
-    __weak typeof(self) weakSelf = self;
-    
-    self.BGImage.image = [UIImage imageNamed:KActivityPlaceholderImg];
-    SDWebImageManager *manager = [SDWebImageManager sharedManager];
-    
-    UIImage *image = [[SDImageCache sharedImageCache] imageFromDiskCacheForKey:self.imageUrl];
-    if (image) {
-        self.BGImage.image = image;
-        self.BGImage.alpha = 0;
-        [UIView animateWithDuration:1 animations:^{
-            weakSelf.BGImage.alpha = 1;
-        }];
-    }else{
-        
-        [manager downloadImageWithURL:[NSURL URLWithString:self.imageUrl] options:SDWebImageRetryFailed progress:^(NSInteger receivedSize, NSInteger expectedSize) {
-            
-        } completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
-            
-            weakSelf.BGImage.image = image;
-            weakSelf.BGImage.alpha = 0;
-            [UIView animateWithDuration:1 animations:^{
-                weakSelf.BGImage.alpha = 1;
-            }];
-        }];
-    }
+    [NetWorkTask setImageView:self.BGImage
+                      WithURL:self.imageUrl
+             placeholderImage:[UIImage imageNamed:KActivityPlaceholderImg]
+                 alterImageID:self.imageID];
     
 }
 

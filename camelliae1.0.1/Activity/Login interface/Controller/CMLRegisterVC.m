@@ -310,14 +310,11 @@
     if ([self.currentApiName isEqualToString:MessageVerify]) {
         
         if ([obj.retCode intValue] == 100204) {
-            NSLog(@"请输入正确手机号");
             [self showAlterViewWithText:@"请输入正确手机号"];
             
         }else if ([obj.retCode intValue] == 100208){
-            NSLog(@"您今日验证码已超限,请联系客服!");
             [self showAlterViewWithText:@"您今日验证码已超限,请联系客服!"];
         }else if ([obj.retCode intValue] == 0){
-           
             [self showAlterViewWithText:@"短信已发送"];
         }
         [self stopLoading];
@@ -337,7 +334,7 @@
         
         }else if ([obj.retCode intValue] == 100100){
         
-            [self showAlterViewWithText:@"参数错误"];
+            [self showAlterViewWithText:@"输入错误"];
         }
         
         [self stopLoading];
@@ -351,7 +348,6 @@
             [[VCManger mainVC] pushVC:vc animate:YES];
             
         }else{
-            NSLog(@"失败");
             [self showAlterViewWithText:obj.retMsg];
         }
     }

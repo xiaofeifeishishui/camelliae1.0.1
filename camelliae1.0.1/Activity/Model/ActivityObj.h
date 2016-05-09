@@ -52,4 +52,6 @@
 
 @property (nonatomic,copy) NSString *shortTitle;
 
+@property (nonatomic,strong) NSNumber *modifyTime;
+
 @end

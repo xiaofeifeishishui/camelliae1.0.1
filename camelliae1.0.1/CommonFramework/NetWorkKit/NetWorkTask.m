@@ -9,6 +9,9 @@
 #import "NetWorkTask.h"
 #import "NetConfig.h"
 #import "UIImageView+WebCache.h"
+#import "NSString+CMLExspand.h"
+#import "SDImageCache.h"
+#import "SDWebImageManager.h"
 
 @implementation NetWorkTask
 
@@ -82,14 +85,76 @@
             }
         }];
     }else{
-    
+    /**无网络提示*/
     }
     return nil;
 }
 
-+ (void) setImageView:(UIImageView *) imageView WithURL:(NSURL *)url placeholderImage:(UIImage *) image{
 
-    [imageView setImageWithURL:url placeholderImage:image];
 
+/**imageID是typeID和ID拼接*/
++ (void) setImageView:(UIImageView *) imageView WithURL:(NSString *)url placeholderImage:(UIImage *) image alterImageID:(NSString *) imageID{
+    
+    
+    imageView.image = image;
+    
+    SDWebImageManager *manager = [SDWebImageManager sharedManager];
+    
+    /**存储地址获取*/
+    NSMutableDictionary *targetDic = [NSMutableDictionary dictionaryWithContentsOfFile:[NSString getImagePlistPath]];
+    
+    /***/
+    __weak typeof(imageView) weakImageView = imageView;
+    
+    if ([targetDic valueForKey:imageID] && ([[targetDic valueForKey:imageID] isEqualToString: url])) {
+        
+        /**从缓存中取图片*/
+        UIImage *image = [[SDImageCache sharedImageCache] imageFromDiskCacheForKey:url];
+        
+        if (image) {
+
+            imageView.image = image;
+            
+        }else{
+            
+            /**图片下载（此段可删除）*/
+            [manager downloadImageWithURL:[NSURL URLWithString:url] options:SDWebImageRetryFailed progress:^(NSInteger receivedSize, NSInteger expectedSize) {
+                
+            } completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+                
+                weakImageView.alpha = 0;
+                weakImageView.image = image;
+                [UIView animateWithDuration:0.5 animations:^{
+                    weakImageView.alpha = 1;
+                }];
+
+            }];
+        }
+        
+    }else{
+        
+        /**存储修改图片时间*/
+        [targetDic setObject:url forKey:imageID];
+        [targetDic writeToFile:[NSString getImagePlistPath] atomically:YES];
+        
+        /**图片下载*/
+        [manager downloadImageWithURL:[NSURL URLWithString:url] options:SDWebImageRetryFailed progress:^(NSInteger receivedSize, NSInteger expectedSize) {
+            
+        } completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+            
+            /**下载完成进行替换*/
+            weakImageView.alpha = 0;
+            weakImageView.image = image;
+            [UIView animateWithDuration:0.5 animations:^{
+                weakImageView.alpha = 1;
+            }];
+
+        }];
+    }
+}
+
+
++ (void)setImageView:(UIImageView *)imageView WithURL:(NSURL *)url placeholderImage:(UIImage *)placeholder{
+    [imageView sd_setImageWithURL:url placeholderImage:placeholder];
 }
 @end

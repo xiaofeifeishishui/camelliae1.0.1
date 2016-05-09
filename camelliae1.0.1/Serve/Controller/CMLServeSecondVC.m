@@ -36,14 +36,23 @@
 
 @property (nonatomic,strong) UITableView *mainTableView;
 
-
 @property (nonatomic,assign) int page;
 
 @property (nonatomic,strong) NSNumber *dataCount;
 
+@property (nonatomic,strong) NSMutableArray *cellShowAnimationArray;
+
 @end
 
 @implementation CMLServeSecondVC
+
+- (NSMutableArray *)cellShowAnimationArray{
+
+    if (!_cellShowAnimationArray) {
+        _cellShowAnimationArray = [NSMutableArray array];
+    }
+    return _cellShowAnimationArray;
+}
 
 - (NSMutableArray *)dataArray{
 
@@ -149,6 +158,7 @@
 - (void) requestSucceedBack:(id)responseResult
                 withApiName:(NSString *)apiName{
     BaseResultObj *obj = [BaseResultObj getBaseObjFrom:responseResult];
+    
     if ([obj.retCode intValue] == 0) {
         self.dataCount = obj.retData.dataCount;
         if (obj.retData.dataList.count > 0) {
@@ -220,21 +230,60 @@
     if (!cell) {
         cell = [[CMLServeTVCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:identifier];
     }
-    for (int i = 0; i < cell.contentView.subviews.count; i++) {
-        UIView *view = [cell viewWithTag:i];
-        [view removeFromSuperview];
-    }
-    if (self.dataArray.count > 0) {
+
+    return cell;
+
+}
+
+- (void)tableView:(UITableView *)tableView willDisplayCell:(CMLServeTVCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath{
+    
+    if (self.dataArray.count >0) {
         
-        /**get model*/
         CMLServeObj *serveModel =  [CMLServeObj getBaseObjFrom:self.dataArray[indexPath.row]];
+        
+        BOOL isShowAnimation = NO;
+        
+        for (NSIndexPath *existIndexPath in self.cellShowAnimationArray) {
+            if (existIndexPath.row == indexPath.row) {
+                isShowAnimation = YES;
+            }
+        }
+        if (!isShowAnimation) {
+            
+            /**动画只做一次*/
+            [self.cellShowAnimationArray addObject:indexPath];
+            
+            CATransform3D rotation;//3D旋转
+            
+            rotation = CATransform3DMakeTranslation(0 ,50 ,20);
+            //逆时针旋转
+            
+            rotation = CATransform3DScale(rotation, 0.9, 0.9, 1);
+            
+            rotation.m34 = 1.0/ -600;
+            
+            cell.layer.shadowColor = [[UIColor blackColor]CGColor];
+            cell.layer.shadowOffset = CGSizeMake(10, 10);
+            cell.alpha = 0;
+            
+            cell.layer.transform = rotation;
+            
+            [UIView beginAnimations:@"rotation" context:NULL];
+            //旋转时间
+            [UIView setAnimationDuration:0.6];
+            cell.layer.transform = CATransform3DIdentity;
+            cell.alpha = 1;
+            cell.layer.shadowOffset = CGSizeMake(0, 0);
+            [UIView commitAnimations];
+        }
+        
         cell.serveName = serveModel.shortTitle;
         cell.imageUrl = serveModel.coverPic;
+        cell.imageID = [NSString stringWithFormat:@"%@%@",serveModel.typeId,serveModel.serveID];
         [cell refreshTableViewCell];
         
     }
-    return cell;
-
+    
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
@@ -268,7 +317,6 @@
         }else{
 
             [self.mainTableView.mj_footer endRefreshing];
-            
         }
         
     }else{

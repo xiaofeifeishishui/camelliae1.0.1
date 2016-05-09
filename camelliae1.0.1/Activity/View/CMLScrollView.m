@@ -84,7 +84,6 @@
                         imageView.alpha = 1;
                     }];
                 }];
-                
                 label.text = _typeNameArray[_imgCount-1];
                 [label sizeToFit];
                 label.frame = CGRectMake(imageView.frame.size.width - label.frame.size.width - 5, imageView.frame.size.height - label.frame.size.height - 10, label.frame.size.width, label.frame.size.height);
