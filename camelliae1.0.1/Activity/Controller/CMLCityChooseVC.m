@@ -53,7 +53,7 @@
     [super viewDidLoad];
     self.view.backgroundColor = [UIColor blackColor];
     self.navBar.backgroundColor = [UIColor blackColor];
-    self.contentView.backgroundColor =[UIColor whiteColor];
+    self.contentView.backgroundColor =[UIColor lightGrayColor];
     self.navBar.titleContent = @"选择城市";
     self.navBar.titleColor = [UIColor CMLTitleYellowColor];
     self.navBar.navigationBarDelegate = self;

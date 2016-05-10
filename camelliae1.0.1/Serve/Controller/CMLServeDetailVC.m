@@ -29,6 +29,7 @@
 #import "WXApi.h"
 #import "UIImage+CMLExspand.h"
 #import "UMSocial.h"
+#import "CMLOtherServeDetailVC.h"
 
 #define Duration                  0.5f
 #define FunctionViewHeight        83
@@ -145,87 +146,6 @@
 
 - (void) loadViews{
     
-    /**功能条*/
-    self.functionView = [[UIView alloc] initWithFrame:CGRectMake(0,
-                                                                 self.contentView.frame.size.height - FunctionViewHeight*Proportion,
-                                                                 self.view.frame.size.width,
-                                                                 FunctionViewHeight*Proportion)];
-    self.functionView.backgroundColor = [UIColor CMLVIPGrayColor];
-    [self.contentView addSubview:self.functionView];
-    
-    UIImageView *shareBtnImge = [[UIImageView alloc] initWithFrame:CGRectMake(ShareButtonLeftMargin*Proportion,
-                                                                             ButtonTopMargin*Proportion,
-                                                                             ButtonWidth*Proportion,
-                                                                             ShareBtnHeight*Proportion)];
-    shareBtnImge.userInteractionEnabled = YES;
-    shareBtnImge.image = [UIImage imageNamed:KBlackShareImg];
-    [self.functionView addSubview:shareBtnImge];
-
-    
-    UIButton *shareBtn = [[UIButton alloc] initWithFrame:CGRectMake(ShareButtonLeftMargin*Proportion - (FunctionViewHeight*Proportion - ButtonWidth*Proportion)/2.0,
-                                                                    0,
-                                                                    FunctionViewHeight*Proportion,
-                                                                    FunctionViewHeight*Proportion)];
-    [shareBtn addTarget:self action:@selector(shareCurrentPage) forControlEvents:UIControlEventTouchUpInside];
-    shareBtn.backgroundColor = [UIColor clearColor];
-    [self.functionView addSubview:shareBtn];
-    
-    UILabel *shareLabel = [[UILabel alloc] init];
-    shareLabel.text = @"分享";
-    shareLabel.textColor = [UIColor blackColor];
-    shareLabel.font = KSystemFontSize9;
-    [shareLabel sizeToFit];
-    shareLabel.textAlignment = NSTextAlignmentCenter;
-    shareLabel.frame = CGRectMake(shareBtnImge.center.x - shareLabel.frame.size.width/2.0,
-                                  CGRectGetMaxY(shareBtnImge.frame)+ ButonLabelTopMargin*Proportion,
-                                  shareLabel.frame.size.width,
-                                  shareLabel.frame.size.height);
-    [self.functionView addSubview:shareLabel];
-    
-    
-    /**收藏按键*/
-    self.collectBtnImge = [[UIImageView alloc] initWithFrame:CGRectMake(CGRectGetMaxX(shareBtnImge.frame) + ButtonSpace*Proportion,
-                                                                       ButtonTopMargin*Proportion,
-                                                                       CollectBtnHeightAndWidth*Proportion,
-                                                                       CollectBtnHeightAndWidth*Proportion)];
-    self.collectBtnImge.userInteractionEnabled = YES;
-    [self.functionView addSubview:self.collectBtnImge];
-    
-    UIButton *collectBtn = [[UIButton alloc] initWithFrame:CGRectMake(self.collectBtnImge.frame.origin.x - (FunctionViewHeight*Proportion - CollectBtnHeightAndWidth*Proportion)/2.0,
-                                                                      0,
-                                                                      FunctionViewHeight*Proportion,
-                                                                      FunctionViewHeight*Proportion)];
-    self.collectBtn = collectBtn;
-    collectBtn.backgroundColor = [UIColor clearColor];
-    [collectBtn addTarget:self action:@selector(collectCurrentInfo:) forControlEvents:UIControlEventTouchUpInside];
-    [self.functionView addSubview:self.collectBtn];
-    
-    UILabel *collectLabel = [[UILabel alloc] init];
-    collectLabel.text = @"收藏";
-    collectLabel.textColor = [UIColor blackColor];
-    collectLabel.textAlignment =NSTextAlignmentCenter;
-    collectLabel.font = KSystemFontSize9;
-    [collectLabel sizeToFit];
-    collectLabel.frame = CGRectMake(self.collectBtnImge.center.x - collectLabel.frame.size.width/2.0,
-                                    CGRectGetMaxY(self.collectBtnImge.frame)+ ButonLabelTopMargin*Proportion,
-                                    collectLabel.frame.size.width,
-                                    collectLabel.frame.size.height);
-    [self.functionView addSubview:collectLabel];
-    
-    UIButton *appointmentBtn = [[UIButton alloc] initWithFrame:CGRectMake(CGRectGetMaxX(collectBtn.frame) + AppointmentBntLeftMargin*Proportion,
-                                                                          0,
-                                                                          self.functionView.frame.size.width - (CGRectGetMaxX(collectBtn.frame) + AppointmentBntLeftMargin*Proportion),
-                                                                          self.functionView.frame.size.height)];
-    [appointmentBtn setBackgroundColor:[UIColor blackColor]];
-    [appointmentBtn setTitle:@"我要预订" forState:UIControlStateNormal];
-    [appointmentBtn setTitle:@"已经预订" forState:UIControlStateSelected];
-    appointmentBtn.titleLabel.font = KSystemFontSize15;
-    [appointmentBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    [appointmentBtn addTarget:self action:@selector(makeAppointmentImmediately) forControlEvents:UIControlEventTouchUpInside];
-    self.appointmentBtn = appointmentBtn;
-    [self.functionView addSubview:self.appointmentBtn];
-    
-    
     /**主界面*/
     CGFloat screenW = self.view.frame.size.width - ContentLeftAndRightMargin*Proportion;
     NSString *js = [NSString stringWithFormat:@"var meta = document.createElement('meta'); meta.setAttribute('name', 'viewport'); meta.setAttribute('content', 'width=device-width'); document.getElementsByTagName('head')[0].appendChild(meta);"
@@ -242,7 +162,7 @@
     self.webView = [[WKWebView alloc] initWithFrame:CGRectMake(0,
                                                                CGRectGetMaxY(self.navBar.frame),
                                                                self.view.frame.size.width ,
-                                                               self.contentView.frame.size.height - self.navBar.frame.size.height - self.functionView.frame.size.height) configuration:config];
+                                                               self.contentView.frame.size.height - self.navBar.frame.size.height - FunctionViewHeight*Proportion) configuration:config];
     self.webView.UIDelegate = self;
     self.webView.scrollView.delegate = self;
     self.webView.navigationDelegate = self;
@@ -251,10 +171,7 @@
     
     
     /**主界面和功能条隐藏*/
-    self.functionView.hidden = YES;
     self.webView.hidden = YES;
-    
-    
     
 }
 
@@ -306,6 +223,117 @@
     return nil;
 }
 
+- (void) setBottomfunctionView{
+
+    /**不显示预定*/
+    int spaceOfButton;
+    spaceOfButton = (self.contentView.frame.size.width - ButtonWidth*Proportion - CollectBtnHeightAndWidth*Proportion)/3;
+    /**功能条*/
+    self.functionView = [[UIView alloc] initWithFrame:CGRectMake(0,
+                                                                 self.contentView.frame.size.height - FunctionViewHeight*Proportion,
+                                                                 self.view.frame.size.width,
+                                                                 FunctionViewHeight*Proportion)];
+    self.functionView.backgroundColor = [UIColor CMLVIPGrayColor];
+    [self.contentView addSubview:self.functionView];
+    
+    UIImageView *shareBtnImge = [[UIImageView alloc] init];
+    if ([self.obj.retData.sysOrderStatus intValue] != 4) {
+        shareBtnImge.frame = CGRectMake(ShareButtonLeftMargin*Proportion,
+                                        ButtonTopMargin*Proportion,
+                                        ButtonWidth*Proportion,
+                                        ShareBtnHeight*Proportion);
+    }else{
+        shareBtnImge.frame = CGRectMake(spaceOfButton,
+                                        ButtonTopMargin*Proportion,
+                                        ButtonWidth*Proportion,
+                                        ShareBtnHeight*Proportion);
+
+    }
+    shareBtnImge.userInteractionEnabled = YES;
+    shareBtnImge.image = [UIImage imageNamed:KBlackShareImg];
+    [self.functionView addSubview:shareBtnImge];
+    
+    
+    UIButton *shareBtn = [[UIButton alloc] init];
+    shareBtn.frame = CGRectMake( shareBtnImge.frame.origin.x- (FunctionViewHeight*Proportion - ButtonWidth*Proportion)/2.0,
+                                0,
+                                FunctionViewHeight*Proportion,
+                                FunctionViewHeight*Proportion);
+
+    [shareBtn addTarget:self action:@selector(shareCurrentPage) forControlEvents:UIControlEventTouchUpInside];
+    shareBtn.backgroundColor = [UIColor clearColor];
+    [self.functionView addSubview:shareBtn];
+    
+    UILabel *shareLabel = [[UILabel alloc] init];
+    shareLabel.text = @"分享";
+    shareLabel.textColor = [UIColor blackColor];
+    shareLabel.font = KSystemFontSize9;
+    [shareLabel sizeToFit];
+    shareLabel.textAlignment = NSTextAlignmentCenter;
+    shareLabel.frame = CGRectMake(shareBtnImge.center.x - shareLabel.frame.size.width/2.0,
+                                  CGRectGetMaxY(shareBtnImge.frame)+ ButonLabelTopMargin*Proportion,
+                                  shareLabel.frame.size.width,
+                                  shareLabel.frame.size.height);
+    [self.functionView addSubview:shareLabel];
+    
+    
+    /**收藏按键*/
+    self.collectBtnImge = [[UIImageView alloc] init];
+    if ([self.obj.retData.sysOrderStatus intValue] != 4) {
+        self.collectBtnImge.frame = CGRectMake(CGRectGetMaxX(shareBtnImge.frame) + ButtonSpace*Proportion,
+                                               ButtonTopMargin*Proportion,
+                                               CollectBtnHeightAndWidth*Proportion,
+                                               CollectBtnHeightAndWidth*Proportion);
+    }else{
+        self.collectBtnImge.frame = CGRectMake(CGRectGetMaxX(shareBtnImge.frame) + spaceOfButton,
+                                        ButtonTopMargin*Proportion,
+                                        CollectBtnHeightAndWidth*Proportion,
+                                        CollectBtnHeightAndWidth*Proportion);
+    
+    }
+    self.collectBtnImge.userInteractionEnabled = YES;
+    [self.functionView addSubview:self.collectBtnImge];
+    
+    UIButton *collectBtn = [[UIButton alloc] init];
+    collectBtn.frame = CGRectMake(self.collectBtnImge.frame.origin.x - (FunctionViewHeight*Proportion - CollectBtnHeightAndWidth*Proportion)/2.0,
+                                  0,
+                                  FunctionViewHeight*Proportion,
+                                  FunctionViewHeight*Proportion);
+    self.collectBtn = collectBtn;
+    collectBtn.backgroundColor = [UIColor clearColor];
+    [collectBtn addTarget:self action:@selector(collectCurrentInfo:) forControlEvents:UIControlEventTouchUpInside];
+    [self.functionView addSubview:self.collectBtn];
+    
+    UILabel *collectLabel = [[UILabel alloc] init];
+    collectLabel.text = @"收藏";
+    collectLabel.textColor = [UIColor blackColor];
+    collectLabel.textAlignment =NSTextAlignmentCenter;
+    collectLabel.font = KSystemFontSize9;
+    [collectLabel sizeToFit];
+    collectLabel.frame = CGRectMake(self.collectBtnImge.center.x - collectLabel.frame.size.width/2.0,
+                                    CGRectGetMaxY(self.collectBtnImge.frame)+ ButonLabelTopMargin*Proportion,
+                                    collectLabel.frame.size.width,
+                                    collectLabel.frame.size.height);
+    [self.functionView addSubview:collectLabel];
+    
+    /**新闻加入服务（操蛋）*/
+    if ([self.obj.retData.sysOrderStatus intValue] != 4) {
+        UIButton *appointmentBtn = [[UIButton alloc] initWithFrame:CGRectMake(CGRectGetMaxX(collectBtn.frame) + AppointmentBntLeftMargin*Proportion,
+                                                                              0,
+                                                                              self.functionView.frame.size.width - (CGRectGetMaxX(collectBtn.frame) + AppointmentBntLeftMargin*Proportion),
+                                                                              self.functionView.frame.size.height)];
+        [appointmentBtn setBackgroundColor:[UIColor blackColor]];
+        [appointmentBtn setTitle:@"已经预订" forState:UIControlStateSelected];
+        appointmentBtn.titleLabel.font = KSystemFontSize15;
+        [appointmentBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        [appointmentBtn addTarget:self action:@selector(makeAppointmentImmediately) forControlEvents:UIControlEventTouchUpInside];
+        self.appointmentBtn = appointmentBtn;
+        [self.functionView addSubview:self.appointmentBtn];
+    }
+    
+    self.functionView.hidden = YES;
+
+}
 #pragma mark - NetWorkProtocol
 /**网络请求回调*/
 - (void) requestSucceedBack:(id)responseResult
@@ -321,6 +349,9 @@
         self.shareImage = [UIImage scaleToSize:transitImage size:CGSizeMake(60, 60)];
         
         if ([self.obj.retCode intValue] == 0) {
+            
+            /**设置底部功能条*/
+            [self setBottomfunctionView];
             
             self.functionView.hidden = NO;
             self.webView.hidden = NO;
@@ -356,6 +387,8 @@
             }else{
                 self.appointmentBtn.selected = NO;
                 self.isShowConfirmationView = YES;
+                [self.appointmentBtn setTitle:self.obj.retData.sysOrderStatusName forState:UIControlStateNormal];
+
             }
             
             [self stopLoading];
@@ -402,9 +435,18 @@
 - (void) makeAppointmentImmediately{
     
     if (!self.appointmentBtn.selected) {
+        if ([self.obj.retData.sysOrderStatus intValue] == 1) {
+            self.isShowConfirmationView = YES;
+            [self showShareViewWithShareModel];
+        }else if ([self.obj.retData.sysOrderStatus intValue] == 5){
         
-        self.isShowConfirmationView = YES;
-        [self showShareViewWithShareModel];
+            CMLOtherServeDetailVC *vc = [[CMLOtherServeDetailVC alloc] init];
+            vc.url = self.obj.retData.orderViewLink;
+            [[VCManger mainVC] pushVC:vc animate:YES];
+
+        }else{
+            [self showAlterViewWithText:self.obj.retData.sysOrderStatusName];
+        }
         
     }else{
         
@@ -1016,7 +1058,6 @@
 
 - (void) shareToWeibo {
     
-    [[UMSocialData defaultData].extConfig.sinaData.urlResource setResourceType:UMSocialUrlResourceTypeWeb url:self.obj.retData.shareLink];
     [[UMSocialDataService defaultDataService]  postSNSWithTypes:@[UMShareToSina] content:[NSString stringWithFormat:@"%@,%@",self.obj.retData.title,self.obj.retData.shareLink] image:self.shareToSinaImage location:nil urlResource:nil presentedController:self completion:^(UMSocialResponseEntity *shareResponse){
         if (shareResponse.responseCode == UMSResponseCodeSuccess) {
             UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"提示信息" message:@"分享成功" delegate:nil cancelButtonTitle:@"好" otherButtonTitles:nil];

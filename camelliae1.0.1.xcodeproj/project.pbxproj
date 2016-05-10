@@ -465,6 +465,7 @@
 		0AF3B2E11CCF80BA008BD5E1 /* feedback@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 0AF3B2DF1CCF80BA008BD5E1 /* feedback@3x.png */; };
 		0AF3B2E41CCFC101008BD5E1 /* CMLCommentListTVCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 0AF3B2E31CCFC101008BD5E1 /* CMLCommentListTVCell.m */; };
 		0AF3B2E71CCFE1B9008BD5E1 /* CommentObj.m in Sources */ = {isa = PBXBuildFile; fileRef = 0AF3B2E61CCFE1B9008BD5E1 /* CommentObj.m */; };
+		0AFA01831CE19630002E7C07 /* CMLOtherServeDetailVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 0AFA01821CE19630002E7C07 /* CMLOtherServeDetailVC.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1189,6 +1190,8 @@
 		0AF3B2E31CCFC101008BD5E1 /* CMLCommentListTVCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CMLCommentListTVCell.m; sourceTree = "<group>"; };
 		0AF3B2E51CCFE1B9008BD5E1 /* CommentObj.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommentObj.h; sourceTree = "<group>"; };
 		0AF3B2E61CCFE1B9008BD5E1 /* CommentObj.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CommentObj.m; sourceTree = "<group>"; };
+		0AFA01811CE19630002E7C07 /* CMLOtherServeDetailVC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMLOtherServeDetailVC.h; sourceTree = "<group>"; };
+		0AFA01821CE19630002E7C07 /* CMLOtherServeDetailVC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CMLOtherServeDetailVC.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -2496,6 +2499,8 @@
 				0A177C271CC75838000E2C44 /* CMLServeSecondVC.m */,
 				0A177C281CC75838000E2C44 /* CMLServeVC.h */,
 				0A177C291CC75838000E2C44 /* CMLServeVC.m */,
+				0AFA01811CE19630002E7C07 /* CMLOtherServeDetailVC.h */,
+				0AFA01821CE19630002E7C07 /* CMLOtherServeDetailVC.m */,
 			);
 			path = Controller;
 			sourceTree = "<group>";
@@ -3248,6 +3253,7 @@
 				0A177C461CC75838000E2C44 /* CMLSysNoticeObj.m in Sources */,
 				0A177C831CC75838000E2C44 /* QNPHAssetResource.m in Sources */,
 				0A177CB91CC75838000E2C44 /* CMLRefreshFooter.m in Sources */,
+				0AFA01831CE19630002E7C07 /* CMLOtherServeDetailVC.m in Sources */,
 				0A177D9B1CC75838000E2C44 /* NetWorkDelegate.m in Sources */,
 				0A177C681CC75838000E2C44 /* MASConstraint.m in Sources */,
 				0A177C321CC75838000E2C44 /* CMLCityChooseVC.m in Sources */,

@@ -193,10 +193,10 @@
 /**网络请求回调*/
 - (void) requestSucceedBack:(id)responseResult
                 withApiName:(NSString *)apiName{
-    
-    self.obj =[BaseResultObj getBaseObjFrom:responseResult];
    
     if ([self.currentApiName isEqualToString:NewsInfo]) {
+        
+        self.obj =[BaseResultObj getBaseObjFrom:responseResult];
         
         NSData *imageNata = [NSData dataWithContentsOfURL:[NSURL URLWithString:self.obj.retData.coverPic]];
         UIImage *image = [UIImage imageWithData:imageNata];
@@ -533,7 +533,6 @@
 
 - (void) shareToWeibo {
     
-    [[UMSocialData defaultData].extConfig.sinaData.urlResource setResourceType:UMSocialUrlResourceTypeWeb url:self.obj.retData.shareLink];
     [[UMSocialDataService defaultDataService]  postSNSWithTypes:@[UMShareToSina] content:[NSString stringWithFormat:@"%@,%@",self.obj.retData.title,self.obj.retData.shareLink] image:self.shareToSinaImage location:nil urlResource:nil presentedController:self completion:^(UMSocialResponseEntity *shareResponse){
         if (shareResponse.responseCode == UMSResponseCodeSuccess) {
             UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"提示信息" message:@"分享成功" delegate:nil cancelButtonTitle:@"好" otherButtonTitles:nil];

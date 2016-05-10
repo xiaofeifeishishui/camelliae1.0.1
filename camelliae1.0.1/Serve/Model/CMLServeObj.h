@@ -62,4 +62,10 @@
 
 @property (nonatomic,copy) NSString *shortTitle;
 
+@property (nonatomic,strong) NSNumber *sysOrderStatus;
+
+@property (nonatomic,copy) NSString *sysOrderStatusName;
+
+@property (nonatomic,copy) NSString *orderViewLink;
+
 @end

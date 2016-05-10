@@ -116,5 +116,17 @@
 
 @property (nonatomic,copy) NSString *shortTitle;
 
+@property (nonatomic,strong) NSNumber *sysOrderStatus;
+
+@property (nonatomic,copy) NSString *sysOrderStatusName;
+
+@property (nonatomic,copy) NSString *orderViewLink;
+
+@property (nonatomic,strong) NSNumber *sysApplyStatus;
+
+@property (nonatomic,copy) NSString *sysApplyStatusName;
+
+@property (nonatomic,copy) NSString *actionViewLink;
+
 
 @end
