@@ -217,7 +217,7 @@
     
     
     if ([self.currentApiName isEqualToString:SubscribeList]) {
-    
+        
         self.dataCount = obj.retData.dataCount;
         if (self.isActivity) {
             

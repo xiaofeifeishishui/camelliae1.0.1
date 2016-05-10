@@ -998,7 +998,7 @@
 - (void) shareToCircleOfFriends{
     
     if (self.obj.retData.shareLink) {
-        [UMSocialData defaultData].extConfig.wechatSessionData.url = self.obj.retData.shareLink;
+        [UMSocialData defaultData].extConfig.wechatTimelineData.url = self.obj.retData.shareLink;
     }
     
     [[UMSocialDataService defaultDataService] postSNSWithTypes:@[UMShareToWechatTimeline] content:self.obj.retData.title image:self.shareImage location:nil urlResource:nil presentedController:self completion:^(UMSocialResponseEntity * response){
@@ -1016,7 +1016,7 @@
 
 - (void) shareToWeibo {
     
-    [[UMSocialData defaultData].extConfig.wechatSessionData.urlResource setResourceType:UMSocialUrlResourceTypeWeb url:self.obj.retData.shareLink];
+    [[UMSocialData defaultData].extConfig.sinaData.urlResource setResourceType:UMSocialUrlResourceTypeWeb url:self.obj.retData.shareLink];
     [[UMSocialDataService defaultDataService]  postSNSWithTypes:@[UMShareToSina] content:[NSString stringWithFormat:@"%@,%@",self.obj.retData.title,self.obj.retData.shareLink] image:self.shareToSinaImage location:nil urlResource:nil presentedController:self completion:^(UMSocialResponseEntity *shareResponse){
         if (shareResponse.responseCode == UMSResponseCodeSuccess) {
             UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"提示信息" message:@"分享成功" delegate:nil cancelButtonTitle:@"好" otherButtonTitles:nil];

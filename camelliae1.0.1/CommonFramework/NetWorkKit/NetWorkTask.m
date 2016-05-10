@@ -117,7 +117,10 @@
             
         }else{
             
-            /**图片下载（此段可删除）*/
+            /**存储修改图片时间*/
+            [targetDic setObject:url forKey:imageID];
+            [targetDic writeToFile:[NSString getImagePlistPath] atomically:YES];
+            /**图片下载*/
             [manager downloadImageWithURL:[NSURL URLWithString:url] options:SDWebImageRetryFailed progress:^(NSInteger receivedSize, NSInteger expectedSize) {
                 
             } completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {

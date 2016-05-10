@@ -59,8 +59,9 @@
     CATransition *transition = [CATransition animation];
     transition.duration =0.5f;
     transition.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
-    transition.type = @"cube";
-    transition.subtype = kCATransitionFromLeft;
+//    transition.type = @"cube";
+//    transition.subtype = kCATransitionFromLeft;
+    transition.subtype = kCATransitionFade;
     transition.delegate = self;
     
     [fromVC.navigationController.view.layer addAnimation:transition forKey:nil];

@@ -291,7 +291,7 @@
         [[VCManger mainVC] pushVC:vc animate:YES];
     }else{
     
-        NSString *path = @"itms-apps://ax.itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purpl+Software&id=1103146605";
+        NSString *path = @"https://appsto.re/cn/T5kWbb.i";
         [[UIApplication sharedApplication] openURL:[NSURL URLWithString:path]];
     
     }
