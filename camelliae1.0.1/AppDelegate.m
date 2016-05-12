@@ -38,11 +38,9 @@
     
      [UMSocialConfig hiddenNotInstallPlatforms:@[UMShareToWechatTimeline,UMShareToWechatSession]];
     
-    
-    
     /**图片修改时间存储位置*/
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    
+    NSLog(@"%@",[NSString getImagePlistPath]);
     if (![fileManager fileExistsAtPath:[NSString getImagePlistPath]]) {
         [[NSFileManager defaultManager] createFileAtPath:[NSString getImagePlistPath] contents:nil attributes:nil];
             NSMutableDictionary *dic = [NSMutableDictionary dictionary];
