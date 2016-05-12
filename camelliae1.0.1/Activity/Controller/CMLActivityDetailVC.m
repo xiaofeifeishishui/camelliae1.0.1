@@ -493,7 +493,7 @@
             [self.contentView addSubview:self.functionView];
             
             /**预约按键处理*/
-            NSLog(@"%@***%@",self.obj.retData.sysApplyStatus,self.obj.retData.sysApplyStatusName);
+            
             if ([self.obj.retData.isAllowApply intValue] == 2) {
                 
                  self.appointmentBtn.selected = NO;
@@ -1266,6 +1266,7 @@
     }
 
     if (self.dataArray.count>0) {
+        
         CommentObj *obj =  [CommentObj getBaseObjFrom:self.dataArray[indexPath.row]];
         cell.imageUrl = obj.userHeadImg;
         cell.nickName = obj.userNickName;
