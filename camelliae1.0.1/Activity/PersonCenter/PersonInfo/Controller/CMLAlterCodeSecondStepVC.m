@@ -35,6 +35,8 @@
 
 @property (nonatomic,strong) UIView *mainBackGround;
 
+@property (nonatomic,copy) NSString *currentApiName;
+
 @end
 
 @implementation CMLAlterCodeSecondStepVC
@@ -142,23 +144,26 @@
 
 - (void) getVerifyCode {
     
-
-    NetWorkDelegate *delegate = [[NetWorkDelegate alloc] init];
-    delegate.delegate = self;
-    
-    NSMutableDictionary *paraDic = [NSMutableDictionary dictionary];
     if (self.telePhoneNum.length >0) {
-     [paraDic setObject:self.telePhoneNum forKey:@"mobile"];
-     [paraDic setObject:[NSNumber numberWithInt:10004] forKey:@"reqType"];
-     NSString *skey = [[DataManager lightData] readSkey];
-     [paraDic setObject:skey forKey:@"skey"];
-     NSString *hashToken = [NSString getEncryptStringfrom:@[self.telePhoneNum,[NSNumber numberWithInt:10004],skey]];
-     [paraDic setObject:hashToken forKey:@"hashToken"];
-     NSNumber *reqTime =[NSNumber numberWithInt:[AppGroup getCurrentDate]];
-     [paraDic setObject:reqTime forKey:@"reqTime"];
-     [NetWorkTask postResquestWithApiName:MessageVerify paraDic:paraDic delegate:delegate];
         
+        NetWorkDelegate *delegate = [[NetWorkDelegate alloc] init];
+        delegate.delegate = self;
+        NSMutableDictionary *paraDic = [NSMutableDictionary dictionary];
+        
+        [paraDic setObject:self.telePhoneNum forKey:@"account"];
+        [paraDic setObject:[NSNumber numberWithInt:2] forKey:@"accountType"];
+        NSString *skey = [[DataManager lightData] readSkey];
+        [paraDic setObject:skey forKey:@"skey"];
+        NSString *hashToken = [NSString getEncryptStringfrom:@[self.telePhoneNum,skey]];
+        [paraDic setObject:hashToken forKey:@"hashToken"];
+        NSNumber *reqTime = [NSNumber numberWithInt:[AppGroup getCurrentDate]];
+        [paraDic setObject:reqTime forKey:@"reqTime"];
+        [NetWorkTask postResquestWithApiName:CheckUser paraDic:paraDic delegate:delegate];
+        self.currentApiName = CheckUser;
         [self startLoading];
+        
+    }else{
+        [self showAlterViewWithText:@"请正确输入手机号"];
     }
 
 }
@@ -169,19 +174,48 @@
 
     BaseResultObj *obj = [BaseResultObj getBaseObjFrom:responseResult];
     
-    if ([obj.retCode intValue] == 0) {
-        
-        
-    }else if ([obj.retCode intValue] == 100204){
-        NSLog(@"请输入正确手机号");
-        [self showAlterViewWithText:obj.retMsg];
+    if ([self.currentApiName isEqualToString:MessageVerify]) {
     
-    }else if ([obj.retCode intValue] ==100208){
-        NSLog(@"您今日验证码已超限,请联系客服!");
-        [self showAlterViewWithText:obj.retMsg];
+        if ([obj.retCode intValue] == 0) {
+            
+            
+        }else if ([obj.retCode intValue] == 100204){
+            NSLog(@"请输入正确手机号");
+            [self showAlterViewWithText:obj.retMsg];
+            
+        }else if ([obj.retCode intValue] ==100208){
+            NSLog(@"您今日验证码已超限,请联系客服!");
+            [self showAlterViewWithText:obj.retMsg];
+        }else{
+            [self showAlterViewWithText:obj.retMsg];
+        }
     }else{
-        [self showAlterViewWithText:obj.retMsg];
+    
+        if([obj.retCode intValue] == 0){
+            
+            NetWorkDelegate *delegate = [[NetWorkDelegate alloc] init];
+            delegate.delegate = self;
+            
+            NSMutableDictionary *paraDic = [NSMutableDictionary dictionary];
+            if (self.telePhoneNum.length >0) {
+                 [paraDic setObject:self.telePhoneNum forKey:@"mobile"];
+                 [paraDic setObject:[NSNumber numberWithInt:10004] forKey:@"reqType"];
+                 NSString *skey = [[DataManager lightData] readSkey];
+                 [paraDic setObject:skey forKey:@"skey"];
+                 NSString *hashToken = [NSString getEncryptStringfrom:@[self.telePhoneNum,[NSNumber numberWithInt:10004],skey]];
+                 [paraDic setObject:hashToken forKey:@"hashToken"];
+                 NSNumber *reqTime =[NSNumber numberWithInt:[AppGroup getCurrentDate]];
+                 [paraDic setObject:reqTime forKey:@"reqTime"];
+                 [NetWorkTask postResquestWithApiName:MessageVerify paraDic:paraDic delegate:delegate];
+                    self.currentApiName = MessageVerify;
+                 [self startLoading];
+            }
+        }else{
+            [self showAlterViewWithText:obj.retMsg];
+        }
+        
     }
+    
     
     [self stopLoading];
 }
@@ -197,10 +231,14 @@
 
 - (void) enterFinshedVC{
 
-    CMLAlterCodeThirdStepVC *vc = [[CMLAlterCodeThirdStepVC alloc] init];
-    vc.telePhoneNum = self.telePhoneNum;
-    vc.verifyCode = self.inputVerifyCodeTextField.text;
-    [[VCManger mainVC] pushVC:vc animate:YES];
+    if (self.inputVerifyCodeTextField.text.length > 0) {
+        CMLAlterCodeThirdStepVC *vc = [[CMLAlterCodeThirdStepVC alloc] init];
+        vc.telePhoneNum = self.telePhoneNum;
+        vc.verifyCode = self.inputVerifyCodeTextField.text;
+        [[VCManger mainVC] pushVC:vc animate:YES];
+    }else{
+        [self showAlterViewWithText:@"请输入验证码"];
+    }
     
 
 }

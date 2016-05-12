@@ -40,7 +40,7 @@
 #define CollectBtnHeightAndWidth  37
 #define ShareButtonLeftMargin     83
 #define ButtonSpace               175
-#define AppointmentBntLeftMargin  110
+#define AppointmentBntLeftMargin  90
 #define ButtonTopMargin           10
 #define ButonLabelTopMargin       5
 

@@ -335,6 +335,8 @@
         }else if ([obj.retCode intValue] == 100100){
         
             [self showAlterViewWithText:@"输入错误"];
+        }else{
+            [self showAlterViewWithText:obj.retMsg];
         }
         
         [self stopLoading];
@@ -342,7 +344,6 @@
     }else{
     
         if ([obj.retCode intValue] == 0) {
-        
             [[DataManager lightData] saveSkey:obj.retData.skey];
             PerfectUserInfoVC *vc = [[PerfectUserInfoVC alloc] init];
             [[VCManger mainVC] pushVC:vc animate:YES];
